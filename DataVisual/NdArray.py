@@ -15,7 +15,7 @@ def SetConfig(Xconf, Yconf):
 
 
 
-class PMSArray(object):
+class DataV(object):
     def __init__(self, array, Xtable, Ytable):
 
         self.Data   = array
