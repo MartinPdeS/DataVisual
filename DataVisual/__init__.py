@@ -1,2 +1,2 @@
-from .NdArray import  DataV, Opt5DArray, SetConfig
-from .Tools.Tables    import XParameter, YParameter, XTable, YTable
+from .NdArray import  DataV, Opt5DArray
+from .Tools.Tables    import YParameter, _XTable, _YTable
