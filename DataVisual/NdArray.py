@@ -1,18 +1,29 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+
 import numpy as np
 import copy
 import matplotlib.pyplot as plt
 
 from DataVisual.Tools.utils       import FormatStr
 from DataVisual.Tools.PlotsUtils  import ExperimentPlot
-from DataVisual.Tools.Tables      import *
 
 def SetConfig(Xconf, Yconf):
     setattr(DataVisual, 'Xconf', Xconf)
     setattr(DataVisual, 'Yconf', Yconf)
 
+class MultiTable(list):
+    def __init__(self, Values):
+        super().__init__(Values)
+
+    def __getitem__(self, Val):
+        if isinstance(Val, str):
+            for n, Object in enumerate(self):
+                if Val == Object.__repr__(): return super(MultiTable, self).__getitem__(n)
+
+        else:
+            return super(MultiTable, self).__getitem__(Val)
 
 
 class DataV(object):
@@ -20,9 +31,10 @@ class DataV(object):
 
         self.Data   = array
 
-        self.Xtable = Xtable
+        self.Xtable = MultiTable(Xtable)
 
         self.Ytable = Ytable
+
 
 
 
@@ -279,6 +291,42 @@ class DataV(object):
 
         return text
 
+
+
+
+
+
+"""
+Qsca vs Diameter
+================
+"""
+
+# sphinx_gallery_thumbnail_path = '../images/Experiment_QabsVSDiameter.png'
+
+def run():
+    import numpy as np
+    from PyMieSim.Experiment import SphereSet, SourceSet, Setup
+    from PyMieSim.Materials  import Gold, Silver, Aluminium
+    from PyMieSim            import Measure
+
+    scatSet   = SphereSet(Diameter = np.linspace(1e-09, 800e-9, 300),
+                          Material = [Silver, Gold, Aluminium],
+                          nMedium  = 1 )
+
+    sourceSet = SourceSet( Wavelength   = 400e-9,
+                           Polarization = 0,
+                           Amplitude    = 1)
+
+    Experiment = Setup(ScattererSet = scatSet,
+                       SourceSet    = sourceSet)
+
+    Data = Experiment.Get(Input=[Measure.Qabs])
+
+    Data.Plot(y=[Measure.Qabs], x='Diameter', yLog=True)
+
+
+if __name__ == '__main__':
+    run()
 
 
 class Opt5DArray(np.ndarray):
