@@ -2,23 +2,7 @@ import numpy as np
 import re
 from typing import Union
 
-
-
-def Norm(Scalar):
-    return np.sqrt(np.sum(np.abs(Scalar)**2))
-
-
-def Normalize(Scalar):
-    return Scalar / Norm(Scalar)
-
-def IO(text):
-    txt = '\n' + '-' * 100 + '\n'
-    txt += text
-    txt += '\n' + '-' * 100
-    return txt
-
-
-UlistLike = (list, np.ndarray, tuple)
+listLike = Union[list, np.ndarray, tuple]
 
 def _ToList(arg):
 
@@ -57,5 +41,18 @@ def FormatStr(function):
 
 def FormatString(string):
     return re.sub(r"\s+", "", string.lower() )
+
+
+def ConvertPolarization(Polarization):
+    if Polarization is None:
+        return 4242
+
+    if isinstance(Polarization, np.ndarray):
+        Polarization[Polarization==None] = 4242
+        return Polarization
+    else:
+        return Polarization
+
+
 
 # -

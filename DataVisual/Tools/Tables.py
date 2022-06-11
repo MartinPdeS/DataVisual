@@ -1,91 +1,129 @@
 from itertools import product
-import DataVisual
+import numpy as np
+
+from DataVisual.Tools.utils import _ToList
+
 
 class XParameter(object):
-    def __init__(self, Name, Array):
-        self.dict        = DataVisual.Xconf[Name]
-        self.Name        = self.dict['name']
-        self.Label       = self.dict['label']
-        self.Format      = self.dict['format']
-        self.Unit        = self.dict['unit']
-        self.Order       = self.dict['order']
-        self.Dimension   = self.dict['dimension']
-        self.Array       = Array
-        self.Size        = len(Array)
+    def __init__(self, Name:   str  = None,
+                       Value:  str  = None,
+                       Format: str  = "",
+                       Label:  str  = "",
+                       Unit:   str  = "",
+                       Legend: str  = "",
+                       Type:   type = float):
 
-    def str(self, Val):
-        if self.Name == 'material' :
-            Val = Val.__str__()
-        if Val is None:
-            return f"{self.Name}: {Val} | "
+        self.Name   = Name
+        self.Value  = _ToList(Value).astype(Type) if Type is not None else _ToList(Value)
+        self.Format = Format
+        self.Unit   = Unit
+        self.Label  = Label + f" {Unit}" if Label != "" else Name
+        self.Legend = Legend             if Legend != "" else Name
+        self.Type   = Type
+
+    def flatten(self):
+        return np.array( [x for x in self.Value] ).flatten()
+
+    def __getitem__(self, item):
+        return self.Value[item]
+
+    def __repr__(self):
+        return self.Name
+
+    def GetSize(self):
+        return self.Value.shape[0]
+
+    def __eq__(self, other):
+        return True if self.Name == other.Name else False
+
+    def str(self, item):
+        return f" | {self.Name} : {self.Value[item]:{self.Format}}"
+
+    def __str__(self):
+        if self.Value.size == 1:
+            return f" | {self.Name} : {self.Value[0]:{self.Format}} {self.Unit}"
         else:
-            return f"{self.Name}: {Val:{self.Format}} | "
-
-    def __repr__(self):
-        return self.Name
+            return self.Value.__str__()
 
 
-class YParameter(object):
-    def __init__(self, Name):
-        self.dict        = DataVisual.Yconf[Name]
-        self.Name        = self.dict['name']
-        self.Label       = self.dict['label']
-        self.Format      = self.dict['format']
-        self.Unit        = self.dict['unit']
-        self.Legend      = f"{self.dict['legend']:<9}| "
-
-    def str(self, Val):
-        if self.Name == 'material' :
-            Val = Val.__str__()
-        return f"{self.Name}: {Val:{self.Format}} | "
-
-    def __repr__(self):
-        return self.Name
+class _XTable(object):
+    def __init__(self, X: list = []):
+        self.X         = X
+        self.Shape     = [x.GetSize() for x in self.X]
+        self.NameTable = { x.Name: order for order, x in enumerate(self.X) }
 
 
-class XTable(object):
-    def __init__(self, X):
-        self.X = X
-        self.Shape = self.GetShape()
-        self.NameTable = self.GetNameTable()
+    def GetValues(self, Axis):
+        return self[Axis].Value
 
 
-    def GetShape(self):
-        return [x.Size for x in self.X]# + [1]
-
-    def GetNameTable(self):
-        return { x.Name: order for order, x in enumerate(self.X) }
+    def GetPosition(self, Value):
+        for order, x in enumerate(self.X):
+            if x.Name == Value:
+                return order
 
 
     def __getitem__(self, Val):
-        if isinstance(Val, str):
-            Val = Val
-            idx = self.NameTable[Val]
-            return self.X[idx]
-        else:
-            return self.X[Val]
+        if Val is None: return None
 
-    def GetSlicer(self, x):
-        Xidx             = self.NameTable[x]
+        Val = self.NameTable[Val] if isinstance(Val, str) else Val
 
-        self.Shape[Xidx] = None
-
-        xval             = self.X[Xidx].Array
-
-        DimSlicer        = [range(s) if s is not None else [slice(None)] for s in self.Shape[:]]
-
-        return product(*DimSlicer)
-
-    def Remove(self, axis):
-        lst = [x for x in self if x.Name != axis]
-
-        newXtable = XTable(X=lst)
-
-        return newXtable
+        return self.X[Val]
 
 
-class YTable(object):
-    def __init__(self, Y=[]):
+    def GetSlicer(self, Axis, Exclude=None):
+        Shape            = self.Shape
+
+        Shape[self.GetPosition(Axis)] = None
+
+        if Exclude:
+            Shape = np.delete(Shape, self.GetPosition(Exclude))
+
+        DimSlicer = [range(s) if s is not None else [slice(None)] for s in Shape]
+
+        return zip( product(*DimSlicer), self.X)
+
+
+    def Remove(self, Axis):
+        return _XTable( X = [x for x in self if x.Name != Axis] )
+
+
+    def GetLabels(self, idx, Exclude=None):
+        """Method generate and return the legend text for the specific plot.
+
+        Parameters
+        ----------
+        axis : :class:`str`
+            Axis which is used for x-axis of the specific plot
+        idx : :class:`tuple`
+            Dimension indices of the specific plot
+
+        Returns
+        -------
+        :class:`str`
+            Text for the legend
+
+        """
+        Exclude = _ToList(Exclude)
+        common  = ''
+        diff    = ''
+
+        for order, Parameter in enumerate(self.X):
+            if Parameter in Exclude:
+                continue
+
+            string = f" | {Parameter.Legend} : {Parameter.Value[idx[order]]:{Parameter.Format}}"
+
+            if Parameter.GetSize() == 1:
+                common += string
+            else:
+                diff += string
+
+        return diff, common
+
+
+class _YTable(object):
+    def __init__(self, Y: list = []):
         self.Y = Y
         self.NameTable = self.GetNameTable()
 
