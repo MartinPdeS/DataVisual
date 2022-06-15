@@ -2,15 +2,40 @@
 # -*- coding: utf-8 -*-
 
 
-import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 
-matplotlib.style.use('ggplot')
-rcParams['font.family'] = 'serif'
-rcParams['axes.edgecolor'] = 'black'
-rcParams['axes.linewidth'] = 1.5
+import numpy as np
+
+
+class PlotSettings():
+    yScale = 'Linear'
+    xScale = 'Linear'
+
+    xLabel = ''
+    yLabel = ''
+    Title  = ''
+
+    FontSize = 15
+    LabelSize = 12
+
+    Normalize = False
+    Polar = False
+
+    Grid = True
+
+    CommonLabel = ''
+    DiffLabel   = ''
+    def __init__(self):
+        matplotlib.style.use('ggplot')
+        rcParams['font.family'] = 'serif'
+        rcParams['axes.edgecolor'] = 'black'
+        rcParams['axes.linewidth'] = 1.5
+
+
+
+
 
 from DataVisual.Tools.utils       import FormatStr, _ToList
 from DataVisual.Tools.PlotsUtils  import ExperimentPlot
@@ -18,14 +43,22 @@ from DataVisual.Tools.Tables      import _XTable, _YTable
 
 
 
+
+
+
+
+
+
 class DataV(object):
     def __init__(self, array, Xtable, Ytable):
 
+        self.Settings = PlotSettings()
+
         self.Data   = array
 
-        self.Xtable = _XTable(Xtable)
+        self.Xtable = _XTable(Xtable, self.Settings)
 
-        self.Ytable = _YTable(Ytable)
+        self.Ytable = _YTable(Ytable, self.Settings)
 
 
 
@@ -197,20 +230,19 @@ class DataV(object):
             for axis, (idx, XVar) in enumerate( self.Xtable.GetSlicer(x) ):
                 idx = list(idx) + [order]
 
-                label, commonLabel = self.Xtable.GetLabels(idx, Exclude=[self.Xtable[x]] )
-
+                self.Xtable.GetLabels(idx, Exclude=[self.Xtable[x]] )
 
                 Y = self.Data[tuple(idx)]
 
                 if Polar:                X = X / 180*np.pi
                 if any(np.iscomplex(Y)): Y = np.abs(Y)
-                if Normalize:            Y /= Y.max()
+                if Normalize:            Y /= Y.max(); self.Settings.Normalize = True
 
-                self._Plot(ax, X, Y, Yparameter.Legend + label, self.Xtable[x], Yparameter)
+                self._Plot(ax, X, Y, Yparameter.Legend + self.Settings.DiffLabel, self.Xtable[x], Yparameter)
 
         plt.gcf().text(0.13,
                        0.91,
-                       commonLabel,
+                       self.Settings.CommonLabel,
                        fontsize  = 8,
                        bbox      = dict(facecolor='none', edgecolor = 'black', boxstyle  = 'round'))
 
@@ -246,11 +278,20 @@ class DataV(object):
 
     def _Plot(self, ax,  X, Y, legend, Xparameter, Yparameter):
         p = ax.plot(X, Y, label=legend)
-        ax.set_xlabel(Xparameter.Legend, fontsize=15)
-        ax.set_ylabel(Yparameter.Legend, fontsize=15)
-        ax.xaxis.set_tick_params(labelsize=12)
-        ax.yaxis.set_tick_params(labelsize=12)
-        ax.grid(True)
+
+        ax.set_xlabel(Xparameter.Legend, fontsize=self.Settings.FontSize)
+
+        if self.Settings.Normalize:
+            ax.set_ylabel(Yparameter.Name + " [A.U.]", fontsize=self.Settings.FontSize)
+
+        else:
+            ax.set_ylabel(Yparameter.Label, fontsize=self.Settings.FontSize)
+
+
+        ax.xaxis.set_tick_params(labelsize=self.Settings.LabelSize)
+        ax.yaxis.set_tick_params(labelsize=self.Settings.LabelSize)
+        ax.grid(self.Settings.Grid)
+
         return p
 
 

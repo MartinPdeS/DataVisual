@@ -47,11 +47,11 @@ class XParameter(object):
 
 
 class _XTable(object):
-    def __init__(self, X: list = []):
+    def __init__(self, X, Settings):
         self.X         = X
         self.Shape     = [x.GetSize() for x in self.X]
         self.NameTable = { x.Name: order for order, x in enumerate(self.X) }
-
+        self.Settings  = Settings
 
     def GetValues(self, Axis):
         return self[Axis].Value
@@ -105,8 +105,7 @@ class _XTable(object):
 
         """
         Exclude = _ToList(Exclude)
-        common  = ''
-        diff    = ''
+        self.Settings.CommonLabel = self.Settings.DiffLabel  = ''
 
         for order, Parameter in enumerate(self.X):
             if Parameter in Exclude:
@@ -115,17 +114,17 @@ class _XTable(object):
             string = f" | {Parameter.Legend} : {Parameter.Value[idx[order]]:{Parameter.Format}}"
 
             if Parameter.GetSize() == 1:
-                common += string
+                self.Settings.CommonLabel += string
             else:
-                diff += string
+                self.Settings.DiffLabel += string
 
-        return diff, common
 
 
 class _YTable(object):
-    def __init__(self, Y: list = []):
+    def __init__(self, Y, Settings):
         self.Y = Y
         self.NameTable = self.GetNameTable()
+        self.Settings = Settings
 
 
     def GetShape(self):
