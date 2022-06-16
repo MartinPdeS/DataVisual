@@ -20,6 +20,8 @@ class XParameter(object):
         self.Label  = Label + f" {Unit}" if Label != "" else Name
         self.Legend = Legend             if Legend != "" else Name
         self.Type   = Type
+        self.Position = None
+        
 
     def flatten(self):
         return np.array( [x for x in self.Value] ).flatten()
@@ -85,7 +87,7 @@ class _XTable(object):
 
 
     def Remove(self, Axis):
-        return _XTable( X = [x for x in self if x.Name != Axis] )
+        return _XTable( X = [x for x in self if x.Name != Axis], Settings=self.Settings )
 
 
     def GetLabels(self, idx, Exclude=None):

@@ -5,6 +5,7 @@
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
+from DataVisual.Plottings.Plots import Scene, Axis, Line, Text, FillLine
 
 import numpy as np
 
@@ -188,8 +189,9 @@ class DataV(object):
 
         return Array
 
-    @ExperimentPlot
-    def Plot(self, y, x, figure=None, ax=None, Polar=False, Normalize=False, Std=None):
+
+
+    def Plot(self, y, x, figure=None, ax=None, Polar=False, Normalize=False, yScale='linear', xScale='linear'):
         """Method plot the multi-dimensional array with the x key as abscissa.
         args and kwargs can be passed as standard input to matplotlib.pyplot.
 
@@ -201,31 +203,24 @@ class DataV(object):
             Options allow to switch between log and linear scale ['log', 'linear'].
 
         """
-        if Std:
-            return self._PlotSTD(y, x, figure=figure, ax=ax, Polar=Polar, Normalize=Normalize, Std=Std)
-
-        else:
-            return self._PlotNormal(y, x, figure=figure, ax=ax, Polar=Polar, Normalize=Normalize)
+        X_  = self.Xtable[x]
+        X = X_.Value
 
 
-    def _PlotNormal(self, y, x, figure=None, ax=None, Polar=False, Normalize=False):
-        """Method plot the multi-dimensional array with the x key as abscissa.
-        args and kwargs can be passed as standard input to matplotlib.pyplot.
+        Fig = Scene('PyMieSim Figure', UnitSize=(10,4))
 
-        Parameters
-        ----------
-        x : str
-            Key of the self dict which represent the abscissa.
-        Scale : str
-            Options allow to switch between log and linear scale ['log', 'linear'].
-
-        """
-        y = _ToList(y)
-        X = self.Xtable[x].Value
+        ax = Axis(Row    = 0,
+                  Col    = 0,
+                  xLabel = X_.Label,
+                  yLabel = y.Label,
+                  Title  = None,
+                  Grid   = True,
+                  xScale = xScale,
+                  yScale = yScale)
 
         for order, Yparameter in enumerate(self.Ytable):
 
-            if Yparameter not in y: continue
+            if Yparameter is not y: continue
 
             for axis, (idx, XVar) in enumerate( self.Xtable.GetSlicer(x) ):
                 idx = list(idx) + [order]
@@ -234,46 +229,120 @@ class DataV(object):
 
                 Y = self.Data[tuple(idx)]
 
-                if Polar:                X = X / 180*np.pi
+                if Polar:                X = np.deg2rad(X)
                 if any(np.iscomplex(Y)): Y = np.abs(Y)
-                if Normalize:            Y /= Y.max(); self.Settings.Normalize = True
 
-                self._Plot(ax, X, Y, Yparameter.Legend + self.Settings.DiffLabel, self.Xtable[x], Yparameter)
+                if Normalize:
+                    Y /= Y.max()
+                    ax.yLabel = Yparameter.Legend + " [A.U.]"
 
-        plt.gcf().text(0.13,
-                       0.91,
-                       self.Settings.CommonLabel,
-                       fontsize  = 8,
-                       bbox      = dict(facecolor='none', edgecolor = 'black', boxstyle  = 'round'))
+                else:
+                    ax.yLabel = Yparameter.Legend + f" {Yparameter.Unit}"
 
 
+                artist = Line(X=X, Y=Y, Label=Yparameter.Legend + self.Settings.DiffLabel)
 
-    def _PlotSTD(self, y, x, figure, ax, Polar, Normalize, Std):
+
+                ax.AddArtist(artist)
+
+        Fig.AddAxes(ax)
+
+        artist = Text(Text=self.Settings.CommonLabel, Position=[0.1, 1.1], FontSize=8)
+        ax.AddArtist(artist)
+
+
+        Fig.Show()
+
+
+
+
+    def _PlotSTD(self, y, x, figure, ax, Polar, Std):
+
+
+
         y = _ToList(y)
         X = self.Xtable[x].Value
 
+        STDAxis = self.Xtable[Std].Position
 
-        STD = self.Std(Std)
-        MEAN = self.Mean(Std)
+        print(STDAxis)
+
+        Fig = Scene('PyMieSim Figure', UnitSize=(10,4))
 
         for order, Yparameter in enumerate(self.Ytable):
-            for axis, (idx, XVar) in enumerate( MEAN.Xtable.GetSlicer(x) ):
 
-                M = MEAN.Data[tuple(idx)].squeeze()
-                S = STD.Data[tuple(idx)].squeeze()
+            if Yparameter not in y: continue
 
-                label, commonLabel = MEAN.Xtable.GetLabels(idx, Exclude=[MEAN.Xtable[x]] )
+            for axis, (idx, XVar) in enumerate( self.Xtable.GetSlicer(x) ):
+                idx = list(idx)
 
-                p = self._Plot(ax, X, M, Yparameter.Legend + label, MEAN.Xtable[x], Yparameter)
+                self.Xtable.GetLabels(idx, Exclude=[self.Xtable[x]] )
 
-                ax.fill_between(X, M-S, M+S, alpha=0.3, color=p[-1].get_color())
+                Y = self.Data[tuple(idx)].squeeze()
+
+                idxSTD = idx; idxSTD[STDAxis] = slice(None)
+                print(idxSTD)
+                M = self.Data[tuple(idxSTD)]
+                print(M.shape)
 
 
-        plt.gcf().text(0.13,
-                       0.91,
-                       commonLabel,
-                       fontsize  = 8,
-                       bbox      = dict(facecolor='none', edgecolor = 'black', boxstyle  = 'round'))
+                if Polar:                X = X / 180*np.pi
+                if any(np.iscomplex(Y)): Y = np.abs(Y)
+
+                artist = FillLine(X=X, Y0=Y, Y1=Y*0, Label=Yparameter.Legend + self.Settings.DiffLabel)
+
+                ax = Axis(Row    = 0,
+                          Col    = 0,
+                          xLabel = 'ITR',
+                          yLabel = r'Effective refraction index',
+                          Title  = None,
+                          Grid   = True,
+                          xScale = 'linear',
+                          yScale = 'linear')
+
+                ax.AddArtist(artist)
+
+                Fig.AddAxes(ax)
+
+        artist = Text(Text=self.Settings.CommonLabel, Position=[0.1, 1.1], FontSize=8)
+        ax.AddArtist(artist)
+
+
+        Fig.Show()
+
+
+
+
+
+
+
+        #
+        #
+        #
+        # for order, Yparameter in enumerate(self.Ytable):
+        #     for axis, (idx, XVar) in enumerate( MEAN.Xtable.GetSlicer(x) ):
+        #
+        #         M = MEAN.Data[tuple(idx)].squeeze()
+        #         S = STD.Data[tuple(idx)].squeeze()
+        #
+        #         label, commonLabel = MEAN.Xtable.GetLabels(idx, Exclude=[MEAN.Xtable[x]] )
+        #
+        #         p = self._Plot(ax, X, M, Yparameter.Legend + label, MEAN.Xtable[x], Yparameter)
+        #
+        #         ax.fill_between(X, M-S, M+S, alpha=0.3, color=p[-1].get_color())
+        #
+        #
+        # plt.gcf().text(0.13,
+        #                0.91,
+        #                commonLabel,
+        #                fontsize  = 8,
+        #                bbox      = dict(facecolor='none', edgecolor = 'black', boxstyle  = 'round'))
+
+    def IterateAxis(self, axis):
+        X = self.Xtable[axis]
+
+        for x in np.moveaxis(self.Data, X.Position, 0):
+            yield x
 
 
     def _Plot(self, ax,  X, Y, legend, Xparameter, Yparameter):
