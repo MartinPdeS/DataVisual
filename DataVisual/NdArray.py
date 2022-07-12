@@ -191,7 +191,7 @@ class DataV(object):
 
 
 
-    def Plot(self, y, x, figure=None, ax=None, Polar=False, Normalize=False, yScale='linear', xScale='linear'):
+    def Plot(self, y, x, figure=None, ax=None, Polar=False, Normalize=False, yScale='linear', xScale='linear', Save=False, Directory="Figure.png", dpi=300):
         """Method plot the multi-dimensional array with the x key as abscissa.
         args and kwargs can be passed as standard input to matplotlib.pyplot.
 
@@ -207,7 +207,7 @@ class DataV(object):
         X = X_.Value
 
 
-        Fig = Scene('PyMieSim Figure', UnitSize=(10,4))
+        Fig = Scene('PyMieSim Figure', UnitSize=(10,4.5))
 
         ax = Axis(Row    = 0,
                   Col    = 0,
@@ -230,7 +230,7 @@ class DataV(object):
                 Y = self.Data[tuple(idx)]
 
                 if Polar:                X = np.deg2rad(X)
-                if any(np.iscomplex(Y)): Y = np.abs(Y)
+
 
                 if Normalize:
                     Y /= Y.max()
@@ -240,10 +240,16 @@ class DataV(object):
                     ax.yLabel = Yparameter.Legend + f" {Yparameter.Unit}"
 
 
-                artist = Line(X=X, Y=Y, Label=Yparameter.Legend + self.Settings.DiffLabel)
+                if np.iscomplexobj(Y):
+                    artist = Line(X=X, Y=Y.real, Label=Yparameter.Legend + self.Settings.DiffLabel + " real")
+                    ax.AddArtist(artist)
+                    artist = Line(X=X, Y=Y.imag, Label=Yparameter.Legend + self.Settings.DiffLabel + " imag")
+                    ax.AddArtist(artist)
+                else:
+                    artist = Line(X=X, Y=Y, Label=Yparameter.Legend + self.Settings.DiffLabel)
+                    ax.AddArtist(artist)
 
 
-                ax.AddArtist(artist)
 
         Fig.AddAxes(ax)
 
@@ -251,7 +257,7 @@ class DataV(object):
         ax.AddArtist(artist)
 
 
-        Fig.Show()
+        Fig.Show(Save=Save, Directory=Directory, dpi=dpi)
 
 
 

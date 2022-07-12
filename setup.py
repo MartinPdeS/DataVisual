@@ -23,9 +23,34 @@ URL             = 'https://github.com/MartinPdeS/DataVisual'
 EMAIL           = 'Martin.poinsinet.de.sivry@gmail.com'
 AUTHOR          = 'Martin Poinsinet de Sivry',
 REQUIRES_PYTHON = '>3.8.0'
-VERSION         = '0.1.4'
 
-# What packages are required for this module to be executed?
+
+
+__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+
+with open(os.path.join(__location__, 'Version'), "r+") as f:
+    Version = f.read().rstrip("\n").split(".")
+    Major, Mid, Minor = int(Version[0]), int(Version[1]), int(Version[2])
+
+if '--NewMajor' in sys.argv:
+    Major += 1
+    sys.argv.remove('--NewMajor')
+if '--NewMid' in sys.argv:
+    Mid += 1
+    sys.argv.remove('--NewMidr')
+if '--NewMinor' in sys.argv:
+    Minor += 1
+    sys.argv.remove('--NewMinor')
+
+Version = f'{Major}.{Mid}.{Minor}'
+
+print(f"DataVisual Version: {Version}")
+
+with open(os.path.join(__location__, 'Version'), "w+") as f:
+    f.writelines(Version)
+
+
+
 requirementPath = os.path.join(os.path.dirname(__file__), 'requirements.txt')
 
 with open(requirementPath,'r') as requirements_txt:
@@ -54,12 +79,12 @@ except FileNotFoundError:
 
 
 about = {}
-if not VERSION:
+if not Version:
     project_slug = NAME.lower().replace("-", "_").replace(" ", "_")
     with open(os.path.join(here, project_slug, '__version__.py')) as f:
         exec(f.read(), about)
 else:
-    about['__version__'] = VERSION
+    about['__version__'] = Version
 
 
 class UploadCommand(Command):
