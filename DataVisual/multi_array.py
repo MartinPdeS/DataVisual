@@ -95,7 +95,7 @@ class DataV(object):
             y: Table.Xparameter,
             normalize: bool = False,
             std: Table.Xparameter = None,
-            add_box: bool = True,
+            add_box: bool = False,
             **kwargs) -> SceneList:
 
         y.values = self.array
