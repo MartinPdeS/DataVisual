@@ -12,9 +12,6 @@ from DataVisual.tools.directories import (
     examples_path
 )
 
-import MPSPlots
-MPSPlots.use_new_age_style()
-
 sys.path.insert(0, project_path)
 sys.path.insert(0, project_path.joinpath('DataVisual'))
 
