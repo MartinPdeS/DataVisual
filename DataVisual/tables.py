@@ -18,60 +18,34 @@ class Xparameter(object):
 
     def __post_init__(self):
         self.values = numpy.atleast_1d(self.values)
+        self.unit = f" [{self.unit}]"
 
         if self.representation is None:
             self.representation = self.values
 
-        self.values = self.values
-
-        self.Label = self.long_label + f" [{self.unit}]" if self.long_label != "" else self.name
         self.short_label = self.short_label if self.short_label != "" else self.name
 
-        self.__base_variable__ = None
-
-    def Setvalues(self, values):
+    def set_values(self, values: numpy.ndarray) -> None:
         self.values = values
 
-    @property
-    def has_unique_value(self):
-        if self.values.shape[0] == 1:
-            return True
-        else:
-            return False
-
     def normalize(self):
-        self.unit = "U.A."
+        self.unit = " [A.U.]"
         self.values /= self.values.max()
 
     def __getitem__(self, item):
         return self.values[item]
 
-    def __repr__(self):
-        return self.name
+    def __repr__(self) -> str:
+        return str(self.name)
 
-    def get_size(self):
+    def get_size(self) -> int:
         return self.values.shape[0]
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         if other is None:
             return False
 
         return True if self.name == other.name else False
-
-    def iterate_through_values(self):
-        if self.__base_variable__ is True:
-            yield slice(None), None, "", ""
-
-        if self.__base_variable__ is False:
-            for n, value in enumerate(self.representation):
-                if self.has_unique_value:
-                    label_in_figure = f" | {self.long_label} : {value}"
-                    label_in_box = ""
-                else:
-                    label_in_figure = ""
-                    label_in_box = f" | {self.long_label} : {value:{self.format}}"
-
-                yield n, value, label_in_figure, label_in_box
 
 
 @dataclass
@@ -85,6 +59,9 @@ class Xtable(object):
 
         self._common_parameter_ = []
         self._different_parameter_ = []
+
+        for idx, x in enumerate(self.X):
+            x.position = idx
 
         for x in self:
             if x.values.size == 1:

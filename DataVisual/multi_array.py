@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import numpy
-import itertools
 from dataclasses import dataclass
 
 import DataVisual.tables as Table
@@ -34,7 +33,7 @@ class DataV(object):
         :returns:    New DataV instance containing the std value of axis.
         :rtype:      DataV
         """
-        array = numpy.std(self.array, axis=axis.position)
+        array = numpy.mean(self.array, axis=axis.position)
 
         new_data_set = DataV(
             array=array,
@@ -56,7 +55,7 @@ class DataV(object):
         :returns:    New DataV instance containing the std value of axis.
         :rtype:      DataV
         """
-        array = numpy.mean(self.array, axis=axis.position)
+        array = numpy.std(self.array, axis=axis.position)
 
         new_data_set = DataV(
             array=array,
@@ -66,7 +65,7 @@ class DataV(object):
 
         return new_data_set
 
-    def Rsd(self, axis: str):
+    def rsd(self, axis: str):
         """
         Method compute and the rsd value of specified axis.
         The method then return a new DataV daughter object compressed in
@@ -92,12 +91,28 @@ class DataV(object):
 
     def plot(self,
             x: Table.Xparameter,
-            y: Table.Xparameter,
             normalize: bool = False,
             std: Table.Xparameter = None,
             add_box: bool = False,
             **kwargs) -> SceneList:
+        """
+        Plots the array according to the input parameters
 
+        :param      x:          THe x-axis parameter
+        :type       x:          Table.Xparameter
+        :param      normalize:  The normalize
+        :type       normalize:  bool
+        :param      std:        The standard
+        :type       std:        { type_description }
+        :param      add_box:    Indicates if the box is added
+        :type       add_box:    bool
+        :param      kwargs:     The keywords arguments
+        :type       kwargs:     dictionary
+
+        :returns:   The scene list.
+        :rtype:     SceneList
+        """
+        y = self.y_table[0]
         y.values = self.array
 
         figure = SceneList(unit_size=(12, 4))
@@ -106,8 +121,8 @@ class DataV(object):
             y.normalize()
 
         ax = figure.append_ax(
-            x_label=x.Label,
-            y_label=y.Label,
+            x_label=x.long_label + x.unit,
+            y_label=y.long_label + y.unit,
             show_legend=True,
             font_size=16,
             legend_font_size=15,
@@ -115,27 +130,14 @@ class DataV(object):
         )
 
         if std is not None:
-            self._add_std_plot_on_ax_(ax=ax, x=x, y=y, std=std)
+            self.add_std_line_to_ax(ax=ax, x=x, y=y, std=std)
         else:
-            self._add_normal_plot_on_ax_(ax=ax, x=x, y=y)
+            self.add_line_plot_to_ax(ax=ax, x=x, y=y)
 
         if add_box:
             self.add_box_info_to_ax(ax=ax, x=x, y=y)
 
         return figure
-
-    def _get_x_table_generator_(self, base_variable):
-        generator = []
-        for x in self.x_table:
-            if x in base_variable:
-                x.__base_variable__ = True
-            else:
-                x.__base_variable__ = False
-
-            x.generator = x.iterate_through_values()
-            generator.append(x.generator)
-
-        return itertools.product(*generator)
 
     def add_box_info_to_ax(self, ax: Axis, x: Table.Xparameter, y: Table.Xparameter) -> None:
         for iteration in self._get_x_table_generator_(base_variable=[x]):
@@ -151,57 +153,99 @@ class DataV(object):
             font_size=12
         )
 
-    def _add_normal_plot_on_ax_(self, ax: Axis, x: Table.Xparameter, y: Table.Xparameter) -> None:
+    def get_diff_label(self, slicer: tuple) -> str:
+        """
+        Gets the label corresponding to the different parameter for each plots
+        taking account for the slicer value.
+
+        :param      slicer:  The slicer
+        :type       slicer:  tuple
+
+        :returns:   The difference label.
+        :rtype:     str
+        """
+        label = ''
+        for i, x_parameter in zip(slicer, self.x_table):
+            if x_parameter.values.size == 1:
+                continue
+
+            if i == slice(None):
+                continue
+
+            value = x_parameter.representation[i]
+            x_label = x_parameter.long_label
+            x_format = x_parameter.format
+            label += f" // {x_label}: {value:{x_format}}"
+
+        return label
+
+    def add_line_plot_to_ax(self, ax: Axis, x: Table.Xparameter, y: Table.Xparameter, **kwargs) -> None:
         """
         Method plot the multi-dimensional array with the x key as abscissa.
-        args and kwargs can be passed as standard input to matplotlib.pyplot.
+        kwargs can be passed as standard input to the artist Line from MPSPLots.
 
         :param      x:    Key of the self dict which represent the abscissa.
         :type       x:    Table.Xparameter
         :param      y:    Key of the self dict which represent the ordinate.
         :type       y:    Table.Xparameter
 
-        :returns:   All the artist to be plotted
-        :rtype:     list
+        :returns:   No returns
+        :rtype:     None
         """
-        for iteration in self._get_x_table_generator_(base_variable=[x]):
-            slicer = []
-            label_in_figure = y.short_label
+        dimensions = [
+            dim for dim, size in enumerate(self.array.shape) if dim != x.position
+        ]
 
-            for idx, _, _, diff in iteration:
-                slicer += [idx]
-                label_in_figure += diff
+        _, index = numpy.nested_iters(self.array, [[], dimensions], flags=["multi_index"])
 
-            slc = tuple([y.position, *slicer])
+        for _ in index:
 
-            data = y[slc]
+            slicer = list(index.multi_index)
+
+            # print(slicer)
+
+            slicer.insert(x.position, slice(None))
+
+            label = self.get_diff_label(slicer=slicer)
+
+            slicer = tuple(slicer)
+            y_data = self.array[slicer]
 
             ax.add_line(
                 x=x.values,
-                y=data,
-                label=label_in_figure
+                y=y_data.squeeze(),
+                label=label,
+                line_width=2,
+                **kwargs
             )
 
-    def _add_std_plot_on_ax_(self, ax: Axis, x: Table.Xparameter, y: Table.Xparameter, std: Table.Xparameter) -> None:
+    def add_std_line_to_ax(self, ax: Axis, x: Table.Xparameter, y: Table.Xparameter, std: Table.Xparameter) -> None:
         """
         Method plot the multi-dimensional array with the x key as abscissa.
-        args and kwargs can be passed as standard input to matplotlib.pyplot.
+        kwargs can be passed as standard input to the artist STDLine from MPSPLots.
 
         :param      x:    Key of the self dict which represent the abscissa.
         :type       x:    Table.Xparameter
         :param      y:    Key of the self dict which represent the ordinate.
         :type       y:    Table.Xparameter
 
-        :returns:   All the artist to be plotted
-        :rtype:     list
+        :returns:   No returns
+        :rtype:     None
         """
-        for iteration in self._get_x_table_generator_(base_variable=[x, std]):
-            label_in_figure = y.short_label
-            slicer = []
+        dimensions = [
+            dim for dim, size in enumerate(self.array.shape) if dim not in [x.position, std.position]
+        ]
 
-            for idx, value, common, diff in iteration:
-                slicer += [idx]
-                label_in_figure += diff
+        _, index = numpy.nested_iters(self.array, [[], dimensions], flags=["multi_index"])
+
+        for _ in index:
+            slicer = list(index.multi_index)
+
+            label = self.get_diff_label(slicer)
+
+            slicer.insert(x.position, slice(None))
+
+            slicer = tuple(slicer)
 
             y_std = numpy.std(
                 self.array,
@@ -215,16 +259,15 @@ class DataV(object):
                 keepdims=True
             )
 
-            slc = tuple([y.position, *slicer])
-
-            y_std = y_std[slc]
-            y_mean = y_mean[slc]
+            y_std = y_std[slicer]
+            y_mean = y_mean[slicer]
 
             ax.add_std_line(
                 x=x.values,
                 y_mean=y_mean.squeeze(),
                 y_std=y_std.squeeze(),
-                label=label_in_figure
+                label=label
             )
+
 
 # -
