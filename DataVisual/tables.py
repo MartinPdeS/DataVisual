@@ -28,6 +28,10 @@ class Xparameter(object):
     def set_values(self, values: numpy.ndarray) -> None:
         self.values = values
 
+    @property
+    def size(self) -> int:
+        return self.values.shape[0]
+
     def normalize(self):
         self.unit = " [A.U.]"
         self.values /= self.values.max()

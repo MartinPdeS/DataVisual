@@ -167,7 +167,7 @@ class DataV(object):
         """
         label = ''
         for i, x_parameter in zip(slicer, self.x_table):
-            if x_parameter.values.size == 1:
+            if x_parameter.size == 1:
                 continue
 
             if i == slice(None):
@@ -175,6 +175,7 @@ class DataV(object):
 
             value = x_parameter.representation[i]
             x_label = x_parameter.long_label
+
             x_format = x_parameter.format
             label += f" // {x_label}: {value:{x_format}}"
 
@@ -202,8 +203,6 @@ class DataV(object):
         for _ in index:
 
             slicer = list(index.multi_index)
-
-            # print(slicer)
 
             slicer.insert(x.position, slice(None))
 
@@ -242,9 +241,14 @@ class DataV(object):
         for _ in index:
             slicer = list(index.multi_index)
 
-            label = self.get_diff_label(slicer)
+            if x.position < std.position:
+                slicer.insert(x.position, slice(None))
+                slicer.insert(std.position, slice(None))
+            else:
+                slicer.insert(std.position, slice(None))
+                slicer.insert(x.position, slice(None))
 
-            slicer.insert(x.position, slice(None))
+            label = self.get_diff_label(slicer)
 
             slicer = tuple(slicer)
 
@@ -269,6 +273,5 @@ class DataV(object):
                 y_std=y_std.squeeze(),
                 label=label
             )
-
 
 # -
