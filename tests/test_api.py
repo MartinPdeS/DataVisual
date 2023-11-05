@@ -42,7 +42,7 @@ def test_plottings(patch):
     data = DataV(
         array=y_parameter.values,
         x_table=Table.Xtable(x_table),
-        y_table=Table.Ytable([y_parameter])
+        y_parameter=y_parameter
     )
 
     figure = data.plot(x=parameter_1)

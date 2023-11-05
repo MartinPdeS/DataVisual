@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 import DataVisual.tables as Table
 from MPSPlots.render2D import SceneList, Axis
+from copy import deepcopy
 
 
 @dataclass
@@ -14,8 +15,8 @@ class DataV(object):
     """ The multi-dimensional array which axis are represented by the given tables """
     x_table: Table.Xtable
     """ Table representing the x dimensions """
-    y_table: Table.Ytable
-    """ Table representing the y dimensions """
+    y_parameter: object
+    """ Parameter representing the y dimensions """
 
     @property
     def shape(self):
@@ -38,7 +39,7 @@ class DataV(object):
         new_data_set = DataV(
             array=array,
             x_table=[x for x in self.x_table if x != axis],
-            y_table=self.y_table
+            y_parameter=self.y_parameter
         )
 
         return new_data_set
@@ -60,7 +61,7 @@ class DataV(object):
         new_data_set = DataV(
             array=array,
             x_table=[x for x in self.x_table if x != axis],
-            y_table=self.y_table
+            y_parameter=self.y_parameter
         )
 
         return new_data_set
@@ -84,7 +85,7 @@ class DataV(object):
         new_data_set = DataV(
             array=array,
             x_table=[x for x in self.x_table if x != axis],
-            y_table=self.y_table
+            y_parameter=self.y_parameter
         )
 
         return new_data_set
@@ -112,17 +113,17 @@ class DataV(object):
         :returns:   The scene list.
         :rtype:     SceneList
         """
-        y = self.y_table[0]
-        y.values = self.array
+        y_parameter = deepcopy(self.y_parameter)
+        y_parameter.values = self.array
 
         figure = SceneList(unit_size=(12, 4))
 
         if normalize:
-            y.normalize()
+            y_parameter.normalize()
 
         ax = figure.append_ax(
             x_label=x.long_label + x.unit,
-            y_label=y.long_label + y.unit,
+            y_label=y_parameter.long_label + y_parameter.unit,
             show_legend=True,
             font_size=16,
             legend_font_size=15,
@@ -130,12 +131,12 @@ class DataV(object):
         )
 
         if std is not None:
-            self.add_std_line_to_ax(ax=ax, x=x, y=y, std=std)
+            self.add_std_line_to_ax(ax=ax, x=x, y=y_parameter, std=std)
         else:
-            self.add_line_plot_to_ax(ax=ax, x=x, y=y)
+            self.add_line_plot_to_ax(ax=ax, x=x, y=y_parameter)
 
         if add_box:
-            self.add_box_info_to_ax(ax=ax, x=x, y=y)
+            self.add_box_info_to_ax(ax=ax, x=x, y=y_parameter)
 
         return figure
 
