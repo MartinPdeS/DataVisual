@@ -110,4 +110,166 @@ def test_plot_std_line(patch):
 
     figure.show()
 
+
+@patch("matplotlib.pyplot.show")
+def test_mean_plot_line(patch):
+    parameter_0 = Xparameter(
+        values=numpy.linspace(0, 1, 5),
+        name='parameter 0',
+        format=".2e",
+        unit="[A.U.]",
+        long_label='Parameter: 0',
+        short_label='Param: 0'
+    )
+
+    parameter_1 = Xparameter(
+        values=numpy.linspace(0, 4, 100),
+        name='parameter 1',
+        format=".2e",
+        unit="[A.U.]",
+        long_label='Parameter: 1',
+        short_label='Param: 1'
+    )
+
+    parameter_2 = Xparameter(
+        values=numpy.linspace(0, 4, 10),
+        name='parameter 1',
+        format=".2e",
+        unit="[A.U.]",
+        long_label='Parameter: 1',
+        short_label='Param: 1'
+    )
+
+    y_parameter = Xparameter(
+        name='Measurement',
+        format="<20s",
+        unit="1",
+        long_label='Arbitrary measure',
+        short_label='Arbit. measure'
+    )
+
+    x_table = [parameter_0, parameter_1, parameter_2]
+
+    array = 1 + 0.3 * numpy.random.rand(4, 100, 10)
+
+    data = DataV(
+        array=array,
+        x_table=Table.Xtable(x_table),
+        y_parameter=y_parameter
+    )
+
+    data = data.mean(axis=parameter_0)
+
+    figure = data.plot(x=parameter_1)
+
+    figure.show()
+
+@patch("matplotlib.pyplot.show")
+def test_std_plot_line(patch):
+    parameter_0 = Xparameter(
+        values=numpy.linspace(0, 1, 5),
+        name='parameter 0',
+        format=".2e",
+        unit="[A.U.]",
+        long_label='Parameter: 0',
+        short_label='Param: 0'
+    )
+
+    parameter_1 = Xparameter(
+        values=numpy.linspace(0, 4, 100),
+        name='parameter 1',
+        format=".2e",
+        unit="[A.U.]",
+        long_label='Parameter: 1',
+        short_label='Param: 1'
+    )
+
+    parameter_2 = Xparameter(
+        values=numpy.linspace(0, 4, 10),
+        name='parameter 1',
+        format=".2e",
+        unit="[A.U.]",
+        long_label='Parameter: 1',
+        short_label='Param: 1'
+    )
+
+    y_parameter = Xparameter(
+        name='Measurement',
+        format="<20s",
+        unit="1",
+        long_label='Arbitrary measure',
+        short_label='Arbit. measure'
+    )
+
+    x_table = [parameter_0, parameter_1, parameter_2]
+
+    array = 1 + 0.3 * numpy.random.rand(4, 100, 10)
+
+    data = DataV(
+        array=array,
+        x_table=Table.Xtable(x_table),
+        y_parameter=y_parameter
+    )
+
+    data = data.std(axis=parameter_0)
+
+    figure = data.plot(x=parameter_1)
+
+    figure.show()
+
+
+@patch("matplotlib.pyplot.show")
+def test_rsd_plot_line(patch):
+    parameter_0 = Xparameter(
+        values=numpy.linspace(0, 1, 5),
+        name='parameter 0',
+        format=".2e",
+        unit="[A.U.]",
+        long_label='Parameter: 0',
+        short_label='Param: 0'
+    )
+
+    parameter_1 = Xparameter(
+        values=numpy.linspace(0, 4, 100),
+        name='parameter 1',
+        format=".2e",
+        unit="[A.U.]",
+        long_label='Parameter: 1',
+        short_label='Param: 1'
+    )
+
+    parameter_2 = Xparameter(
+        values=numpy.linspace(0, 4, 10),
+        name='parameter 1',
+        format=".2e",
+        unit="[A.U.]",
+        long_label='Parameter: 1',
+        short_label='Param: 1'
+    )
+
+    y_parameter = Xparameter(
+        name='Measurement',
+        format="<20s",
+        unit="1",
+        long_label='Arbitrary measure',
+        short_label='Arbit. measure'
+    )
+
+    x_table = [parameter_0, parameter_1, parameter_2]
+
+    array = 1 + 0.3 * numpy.random.rand(4, 100, 10)
+
+    data = DataV(
+        array=array,
+        x_table=Table.Xtable(x_table),
+        y_parameter=y_parameter
+    )
+
+    data = data.rsd(axis=parameter_0)
+
+    figure = data.plot(x=parameter_1)
+
+    figure.show()
+
+
 # -

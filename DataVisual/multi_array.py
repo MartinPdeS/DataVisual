@@ -36,9 +36,13 @@ class DataV(object):
         """
         array = numpy.mean(self.array, axis=axis.position)
 
+        x_table = [x for x in self.x_table if x != axis]
+
+        x_table = Table.Xtable(x_table)
+
         new_data_set = DataV(
             array=array,
-            x_table=[x for x in self.x_table if x != axis],
+            x_table=x_table,
             y_parameter=self.y_parameter
         )
 
@@ -58,9 +62,13 @@ class DataV(object):
         """
         array = numpy.std(self.array, axis=axis.position)
 
+        x_table = [x for x in self.x_table if x != axis]
+
+        x_table = Table.Xtable(x_table)
+
         new_data_set = DataV(
             array=array,
-            x_table=[x for x in self.x_table if x != axis],
+            x_table=x_table,
             y_parameter=self.y_parameter
         )
 
@@ -79,12 +87,16 @@ class DataV(object):
         :returns:    New DataV instance containing the std value of axis.
         :rtype:      DataV
         """
-        array = numpy.std(self.array, axis=self.x_table.nameTable[axis]) \
-                / numpy.mean(self.array, axis=self.x_table.nameTable[axis])
+        array = numpy.std(self.array, axis=axis.position) \
+                / numpy.mean(self.array, axis=axis.position)
+
+        x_table = [x for x in self.x_table if x != axis]
+
+        x_table = Table.Xtable(x_table)
 
         new_data_set = DataV(
             array=array,
-            x_table=[x for x in self.x_table if x != axis],
+            x_table=x_table,
             y_parameter=self.y_parameter
         )
 
