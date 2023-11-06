@@ -164,7 +164,7 @@ class DataV(object):
             if x_parameter.size == 1:
                 column_labels.append(x_parameter.long_label)
 
-                table_string = x_parameter.get_representation(index=0, short=True)
+                table_string = x_parameter.get_value_representation(index=0)
 
                 table_values.append(table_string)
 

@@ -27,7 +27,13 @@ class Xparameter(object):
     def set_values(self, values: numpy.ndarray) -> None:
         self.values = values
 
-    def get_representation(self, index: int = None, short: bool = False) -> str:
+    def get_value_representation(self, index: int) -> str:
+        if self.representation is not None:
+            return self.representation
+
+        return f"{self.values[index]:{self.format}}"
+
+    def get_representation(self, index: int = None, value_only: bool = False, short: bool = False) -> str:
         if self.representation is not None:
             return self.representation
         else:
