@@ -115,8 +115,9 @@ class DataV(object):
         """
         y_parameter = deepcopy(self.y_parameter)
         y_parameter.values = self.array
+        x.is_base = True
 
-        figure = SceneList(unit_size=(12, 4))
+        figure = SceneList(unit_size=(12, 5), tight_layout=True)
 
         if normalize:
             y_parameter.normalize()
@@ -136,22 +137,30 @@ class DataV(object):
             self.add_line_plot_to_ax(ax=ax, x=x, y=y_parameter)
 
         if add_box:
-            self.add_box_info_to_ax(ax=ax, x=x, y=y_parameter)
+            self.add_box_info_to_ax(ax=ax)
 
         return figure
 
-    def add_box_info_to_ax(self, ax: Axis, x: Table.Xparameter, y: Table.Xparameter) -> None:
-        for iteration in self._get_x_table_generator_(base_variable=[x]):
-            label_in_box = ""
+    def add_box_info_to_ax(self, ax: Axis, except_parameter: list = []) -> None:
+        column_labels = []
+        table_values = []
 
-            for _, _, common, _ in iteration:
-                label_in_box += common
+        for x_parameter in self.x_table:
+            if x_parameter.is_base:
+                continue
 
-        ax.add_text(
-            text=label_in_box,
-            add_box=True,
-            localisation='lower left',
-            font_size=12
+            if x_parameter.size == 1:
+                column_labels.append(x_parameter.long_label)
+
+                table_string = x_parameter.get_representation(index=0, short=True)
+
+                table_values.append(table_string)
+
+        ax.add_table(
+            table_values=[table_values],
+            column_labels=column_labels,
+            row_labels=[''],
+            position='top'
         )
 
     def get_diff_label(self, slicer: tuple) -> str:
@@ -173,11 +182,9 @@ class DataV(object):
             if i == slice(None):
                 continue
 
-            value = x_parameter.representation[i]
-            x_label = x_parameter.long_label
+            repr_string = x_parameter.get_representation(index=i, short=False)
 
-            x_format = x_parameter.format
-            label += f" // {x_label}: {value:{x_format}}"
+            label += f" // {repr_string}"
 
         return label
 
@@ -232,6 +239,7 @@ class DataV(object):
         :returns:   No returns
         :rtype:     None
         """
+        std.is_base = True
         dimensions = [
             dim for dim, size in enumerate(self.array.shape) if dim not in [x.position, std.position]
         ]

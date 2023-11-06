@@ -16,17 +16,27 @@ class Xparameter(object):
     short_label: str = ""
     position: int = None
 
+    is_base: bool = False
+
     def __post_init__(self):
         self.values = numpy.atleast_1d(self.values)
         self.unit = f" [{self.unit}]"
-
-        if self.representation is None:
-            self.representation = self.values
 
         self.short_label = self.short_label if self.short_label != "" else self.name
 
     def set_values(self, values: numpy.ndarray) -> None:
         self.values = values
+
+    def get_representation(self, index: int = None, short: bool = False) -> str:
+        if self.representation is not None:
+            return self.representation
+        else:
+            label = self.short_label if short else self.long_label
+
+        if index is None or len(label) == 0:
+            return label
+
+        return f"{label}: {self.values[index]:{self.format}}"
 
     @property
     def size(self) -> int:
