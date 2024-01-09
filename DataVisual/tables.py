@@ -33,16 +33,32 @@ class Xparameter(object):
 
         return f"{self.values[index]:{self.format}}"
 
-    def get_representation(self, index: int = None, value_only: bool = False, short: bool = False) -> str:
-        if self.representation is not None:
-            return self.representation
-        else:
-            label = self.short_label if short else self.long_label
+    def get_representation(
+            self,
+            index: int = None,
+            value_only: bool = False,
+            short: bool = True) -> str:
+        """
+        Gets the representation of a variable at certain index in the table.
+
+        :param      index:       The index at which evaluate the values
+        :type       index:       int
+        :param      value_only:  Returns only the value
+        :type       value_only:  bool
+        :param      short:       Returns short or long representation string
+        :type       short:       bool
+
+        :returns:   The representation.
+        :rtype:     str
+        """
+        values = self.representation if self.representation is not None else self.values
+
+        label = self.short_label if short else self.long_label
 
         if index is None or len(label) == 0:
             return label
 
-        return f"{label}: {self.values[index]:{self.format}}"
+        return f"{label}: {values[index]:{self.format}}"
 
     @property
     def size(self) -> int:

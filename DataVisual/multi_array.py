@@ -102,7 +102,8 @@ class DataV(object):
 
         return new_data_set
 
-    def plot(self,
+    def plot(
+            self,
             x: Table.Xparameter,
             normalize: bool = False,
             std: Table.Xparameter = None,
@@ -196,7 +197,7 @@ class DataV(object):
 
             repr_string = x_parameter.get_representation(index=i, short=False)
 
-            label += f" // {repr_string}"
+            label += f" :: {repr_string}"
 
         return label
 

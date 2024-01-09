@@ -17,7 +17,7 @@ Testing
 
 To test localy (with cloning the GitHub repository) you'll need to install the dependencies and run the coverage command as
 
-.. code:: console
+.. code:: python
 
    >>> pip install -r requirements/requirements.txt
    >>> coverage run --source=PyMieSim --module pytest --verbose tests coverage report --show-missing
