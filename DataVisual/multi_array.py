@@ -5,102 +5,87 @@ import numpy
 from dataclasses import dataclass
 
 import DataVisual.tables as Table
+from DataVisual.utils import scale_unit
 from MPSPlots.render2D import SceneList, Axis
 from copy import deepcopy
 
 
 @dataclass
-class DataV(object):
-    array: numpy.ndarray
-    """ The multi-dimensional array which axis are represented by the given tables """
+class DataVisual(object):
     x_table: Table.Xtable
     """ Table representing the x dimensions """
-    y_parameter: object
+    y: object
     """ Parameter representing the y dimensions """
 
     @property
     def shape(self):
-        return self.array.shape
+        return self.y.values.shape
 
+    def generate_y_copy(function):
+        def wrapper(self, axis):
+            new_y = deepcopy(self.y)
+
+            x_table = [x for x in self.x_table if x != axis]
+
+            x_table = Table.Xtable(x_table)
+
+            new_values = function(self, axis=axis)
+
+            new_y.values = new_values
+
+            return DataVisual(x_table=x_table, y=new_y)
+
+        return wrapper
+
+    @generate_y_copy
     def mean(self, axis: str):
         """
         Method compute and the mean value of specified axis.
-        The method then return a new DataV daughter object compressed in
+        The method then return a new DataVisual daughter object compressed in
         the said axis.
 
         :param      axis:  Axis for which to perform the operation.
         :type       axis:  str
 
-        :returns:    New DataV instance containing the std value of axis.
-        :rtype:      DataV
+        :returns:    New DataVisual instance containing the std value of axis.
+        :rtype:      DataVisual
         """
-        array = numpy.mean(self.array, axis=axis.position)
 
-        x_table = [x for x in self.x_table if x != axis]
+        return numpy.mean(self.y.values, axis=axis.position)
 
-        x_table = Table.Xtable(x_table)
-
-        new_data_set = DataV(
-            array=array,
-            x_table=x_table,
-            y_parameter=self.y_parameter
-        )
-
-        return new_data_set
-
+    @generate_y_copy
     def std(self, axis: str):
         """
         Method compute and the std value of specified axis.
-        The method then return a new DataV daughter object compressed in
+        The method then return a new DataVisual daughter object compressed in
         the said axis.
 
         :param      axis:  Axis for which to perform the operation.
         :type       axis:  str
 
-        :returns:    New DataV instance containing the std value of axis.
-        :rtype:      DataV
+        :returns:    New DataVisual instance containing the std value of axis.
+        :rtype:      DataVisual
         """
-        array = numpy.std(self.array, axis=axis.position)
+        return numpy.std(self.y.values, axis=axis.position)
 
-        x_table = [x for x in self.x_table if x != axis]
-
-        x_table = Table.Xtable(x_table)
-
-        new_data_set = DataV(
-            array=array,
-            x_table=x_table,
-            y_parameter=self.y_parameter
-        )
-
-        return new_data_set
-
+    @generate_y_copy
     def rsd(self, axis: str):
         """
         Method compute and the rsd value of specified axis.
-        The method then return a new DataV daughter object compressed in
+        The method then return a new DataVisual daughter object compressed in
         the said axis.
         rsd is defined as std/mean.
 
         :param      axis:  Axis for which to perform the operation.
         :type       axis:  str
 
-        :returns:    New DataV instance containing the std value of axis.
-        :rtype:      DataV
+        :returns:    New DataVisual instance containing the std value of axis.
+        :rtype:      DataVisual
         """
-        array = numpy.std(self.array, axis=axis.position) \
-                / numpy.mean(self.array, axis=axis.position)
+        std = numpy.std(self.y.values, axis=axis.position)
+        mean = numpy.mean(self.y.values, axis=axis.position)
 
-        x_table = [x for x in self.x_table if x != axis]
-
-        x_table = Table.Xtable(x_table)
-
-        new_data_set = DataV(
-            array=array,
-            x_table=x_table,
-            y_parameter=self.y_parameter
-        )
-
-        return new_data_set
+        return std / mean
 
     def plot(
             self,
@@ -126,28 +111,34 @@ class DataV(object):
         :returns:   The scene list.
         :rtype:     SceneList
         """
-        y_parameter = deepcopy(self.y_parameter)
-        y_parameter.values = self.array
+        y = deepcopy(self.y)
+        y.values = self.y.values
+
         x.is_base = True
 
         figure = SceneList(unit_size=(12, 5), tight_layout=True)
 
         if normalize:
-            y_parameter.normalize()
+            y.normalize()
+
+        y_label = f" {y.long_label} [{y.unit}]"
+
+        x_label = f" {x.long_label} [{x.unit}]"
 
         ax = figure.append_ax(
-            x_label=x.long_label + x.unit,
-            y_label=y_parameter.long_label + y_parameter.unit,
+            x_label=x_label,
+            y_label=y_label,
             show_legend=True,
-            font_size=16,
-            legend_font_size=15,
+            font_size=22,
+            legend_font_size=18,
+            tick_size=20,
             **kwargs
         )
 
         if std is not None:
-            self.add_std_line_to_ax(ax=ax, x=x, y=y_parameter, std=std)
+            self.add_std_line_to_ax(ax=ax, x=x, y=y, std=std)
         else:
-            self.add_line_plot_to_ax(ax=ax, x=x, y=y_parameter)
+            self.add_line_plot_to_ax(ax=ax, x=x, y=y)
 
         if add_box:
             self.add_box_info_to_ax(ax=ax)
@@ -215,10 +206,10 @@ class DataV(object):
         :rtype:     None
         """
         dimensions = [
-            dim for dim, size in enumerate(self.array.shape) if dim != x.position
+            dim for dim, size in enumerate(self.y.values.shape) if dim != x.position
         ]
 
-        _, index = numpy.nested_iters(self.array, [[], dimensions], flags=["multi_index"])
+        _, index = numpy.nested_iters(self.y.values, [[], dimensions], flags=["multi_index"])
 
         for _ in index:
 
@@ -229,7 +220,7 @@ class DataV(object):
             label = self.get_diff_label(slicer=slicer)
 
             slicer = tuple(slicer)
-            y_data = self.array[slicer]
+            y_data = self.y.values[slicer]
 
             ax.add_line(
                 x=x.values,
@@ -254,10 +245,10 @@ class DataV(object):
         """
         std.is_base = True
         dimensions = [
-            dim for dim, size in enumerate(self.array.shape) if dim not in [x.position, std.position]
+            dim for dim, size in enumerate(self.y.values.shape) if dim not in [x.position, std.position]
         ]
 
-        _, index = numpy.nested_iters(self.array, [[], dimensions], flags=["multi_index"])
+        _, index = numpy.nested_iters(self.y.values, [[], dimensions], flags=["multi_index"])
 
         for _ in index:
             slicer = list(index.multi_index)
@@ -274,13 +265,13 @@ class DataV(object):
             slicer = tuple(slicer)
 
             y_std = numpy.std(
-                self.array,
+                self.y.values,
                 axis=std.position,
                 keepdims=True
             )
 
             y_mean = numpy.mean(
-                self.array,
+                self.y.values,
                 axis=std.position,
                 keepdims=True
             )
@@ -294,5 +285,12 @@ class DataV(object):
                 y_std=y_std.squeeze(),
                 label=label
             )
+
+    def scale_unit(self, scale: str, inverse_proportional: bool = False) -> None:
+        return scale_unit(
+            parameter=self.y,
+            inverse_proportional=inverse_proportional,
+            scale=scale
+        )
 
 # -

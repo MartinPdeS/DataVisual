@@ -8,7 +8,7 @@ from dataclasses import dataclass
 @dataclass
 class Xparameter(object):
     name: str = None
-    values: str = None
+    values: numpy.ndarray = None
     representation: str = None
     format: str = ""
     long_label: str = ""
@@ -18,9 +18,9 @@ class Xparameter(object):
 
     is_base: bool = False
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.values = numpy.atleast_1d(self.values)
-        self.unit = f" [{self.unit}]"
+        self.unit = f"{self.unit}"
 
         self.short_label = self.short_label if self.short_label != "" else self.name
 
@@ -31,7 +31,45 @@ class Xparameter(object):
         if self.representation is not None:
             return self.representation
 
-        return f"{self.values[index]:{self.format}}"
+        value = self.values[index]
+
+        return f"{value:{self.format}}"
+
+    def scale_unit(self, scale: str, inverse_proportional: bool = False) -> None:
+        """
+        Function that scales the unit an arrays of the parameter
+
+        :param      scale:                 The scale
+        :type       scale:                 str
+        :param      inverse_proportional:  The inverse proportional
+        :type       inverse_proportional:  bool
+
+        :returns:   No return
+        :rtype:     None
+        """
+        match scale.lower():
+            case 'milli':
+                prefix = "m"
+                factor = 1e3
+            case 'micro':
+                prefix = r"$\mu$"
+                factor = 1e6
+            case 'kilo':
+                prefix = r"k"
+                factor = 1e-3
+            case 'mega':
+                prefix = r"M"
+                factor = 1e-6
+            case 'giga':
+                prefix = r"G"
+                factor = 1e-9
+
+        self.unit = f'{prefix}{self.unit}'
+
+        if inverse_proportional:
+            self.values /= factor
+        else:
+            self.values *= factor
 
     def get_representation(
             self,
@@ -64,12 +102,12 @@ class Xparameter(object):
     def size(self) -> int:
         return self.values.shape[0]
 
-    def normalize(self):
+    def normalize(self) -> None:
         self.unit = " [A.U.]"
         self.values /= self.values.max()
 
-    def __getitem__(self, item):
-        return self.values[item]
+    def __getitem__(self, idx: int) -> numpy.ndarray:
+        return self.values[idx]
 
     def __repr__(self) -> str:
         return str(self.name)

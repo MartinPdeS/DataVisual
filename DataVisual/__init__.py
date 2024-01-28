@@ -1,3 +1,3 @@
 
-from .multi_array import DataV
+from .multi_array import DataVisual
 from .tables import Xparameter, Xtable

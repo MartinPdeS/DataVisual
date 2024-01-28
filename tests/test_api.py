@@ -3,7 +3,7 @@
 
 from unittest.mock import patch
 import numpy
-from DataVisual import DataV, Xparameter
+from DataVisual import DataVisual, Xparameter
 import DataVisual.tables as Table
 
 
@@ -39,10 +39,9 @@ def test_plot_line(patch):
 
     y_parameter.values = 1 + 0.3 * numpy.random.rand(4, 100)
 
-    data = DataV(
-        array=y_parameter.values,
+    data = DataVisual(
         x_table=Table.Xtable(x_table),
-        y_parameter=y_parameter
+        y=y_parameter
     )
 
     figure = data.plot(x=parameter_1)
@@ -100,10 +99,9 @@ def test_plot_std_line(patch):
 
     y_parameter.values = scalar
 
-    data = DataV(
-        array=scalar,
+    data = DataVisual(
         x_table=Table.Xtable(x_table),
-        y_parameter=y_parameter,
+        y=y_parameter,
     )
 
     figure = data.plot(x=parameter_1, std=parameter_2)
@@ -150,12 +148,11 @@ def test_mean_plot_line(patch):
 
     x_table = [parameter_0, parameter_1, parameter_2]
 
-    array = 1 + 0.3 * numpy.random.rand(4, 100, 10)
+    y_parameter.values = 1 + 0.3 * numpy.random.rand(4, 100, 10)
 
-    data = DataV(
-        array=array,
+    data = DataVisual(
         x_table=Table.Xtable(x_table),
-        y_parameter=y_parameter
+        y=y_parameter
     )
 
     data = data.mean(axis=parameter_0)
@@ -163,6 +160,7 @@ def test_mean_plot_line(patch):
     figure = data.plot(x=parameter_1)
 
     figure.show()
+
 
 @patch("matplotlib.pyplot.show")
 def test_std_plot_line(patch):
@@ -203,12 +201,11 @@ def test_std_plot_line(patch):
 
     x_table = [parameter_0, parameter_1, parameter_2]
 
-    array = 1 + 0.3 * numpy.random.rand(4, 100, 10)
+    y_parameter.values = 1 + 0.3 * numpy.random.rand(4, 100, 10)
 
-    data = DataV(
-        array=array,
+    data = DataVisual(
         x_table=Table.Xtable(x_table),
-        y_parameter=y_parameter
+        y=y_parameter
     )
 
     data = data.std(axis=parameter_0)
@@ -257,12 +254,11 @@ def test_rsd_plot_line(patch):
 
     x_table = [parameter_0, parameter_1, parameter_2]
 
-    array = 1 + 0.3 * numpy.random.rand(4, 100, 10)
+    y_parameter.values = 1 + 0.3 * numpy.random.rand(4, 100, 10)
 
-    data = DataV(
-        array=array,
+    data = DataVisual(
         x_table=Table.Xtable(x_table),
-        y_parameter=y_parameter
+        y=y_parameter
     )
 
     data = data.rsd(axis=parameter_0)
