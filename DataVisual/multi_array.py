@@ -287,6 +287,17 @@ class DataVisual(object):
             )
 
     def scale_unit(self, scale: str, inverse_proportional: bool = False) -> None:
+        """
+        Function that scales the unit an arrays of the parameter
+
+        :param      scale:                 The scale
+        :type       scale:                 str
+        :param      inverse_proportional:  The inverse proportional
+        :type       inverse_proportional:  bool
+
+        :returns:   No return
+        :rtype:     None
+        """
         return scale_unit(
             parameter=self.y,
             inverse_proportional=inverse_proportional,

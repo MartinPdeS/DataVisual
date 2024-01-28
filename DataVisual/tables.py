@@ -4,6 +4,8 @@
 import numpy
 from dataclasses import dataclass
 
+from DataVisual.utils import scale_unit
+
 
 @dataclass
 class Xparameter(object):
@@ -24,9 +26,6 @@ class Xparameter(object):
 
         self.short_label = self.short_label if self.short_label != "" else self.name
 
-    def set_values(self, values: numpy.ndarray) -> None:
-        self.values = values
-
     def get_value_representation(self, index: int) -> str:
         if self.representation is not None:
             return self.representation
@@ -41,35 +40,17 @@ class Xparameter(object):
 
         :param      scale:                 The scale
         :type       scale:                 str
-        :param      inverse_proportional:  The inverse proportional
+        :param      inverse_proportional:  Reverse the factor relation if True
         :type       inverse_proportional:  bool
 
         :returns:   No return
         :rtype:     None
         """
-        match scale.lower():
-            case 'milli':
-                prefix = "m"
-                factor = 1e3
-            case 'micro':
-                prefix = r"$\mu$"
-                factor = 1e6
-            case 'kilo':
-                prefix = r"k"
-                factor = 1e-3
-            case 'mega':
-                prefix = r"M"
-                factor = 1e-6
-            case 'giga':
-                prefix = r"G"
-                factor = 1e-9
-
-        self.unit = f'{prefix}{self.unit}'
-
-        if inverse_proportional:
-            self.values /= factor
-        else:
-            self.values *= factor
+        return scale_unit(
+            parameter=self,
+            inverse_proportional=inverse_proportional,
+            scale=scale
+        )
 
     def get_representation(
             self,
@@ -103,7 +84,7 @@ class Xparameter(object):
         return self.values.shape[0]
 
     def normalize(self) -> None:
-        self.unit = " [A.U.]"
+        self.unit = "A.U."
         self.values /= self.values.max()
 
     def __getitem__(self, idx: int) -> numpy.ndarray:
