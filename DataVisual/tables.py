@@ -19,6 +19,7 @@ class Xparameter(object):
     position: int = None
 
     is_base: bool = False
+    scale: str = 'none'
 
     def __post_init__(self) -> None:
         self.values = numpy.atleast_1d(self.values)

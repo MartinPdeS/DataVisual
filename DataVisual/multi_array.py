@@ -16,6 +16,7 @@ class DataVisual(object):
     """ Table representing the x dimensions """
     y: object
     """ Parameter representing the y dimensions """
+    scale: str = 'none'
 
     @property
     def shape(self):
