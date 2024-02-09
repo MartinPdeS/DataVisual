@@ -46,7 +46,7 @@ python:
     - method: pip
       path: .
       extra_requirements:
-        - development
+        - documentation
 
 sphinx:
   builder: html
