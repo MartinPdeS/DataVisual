@@ -143,7 +143,6 @@ class DataVisual:
             A SceneList object containing the plot.
         """
         y = deepcopy(self.y)
-        # y.values = self.y.values
 
         x.is_base = True
 
