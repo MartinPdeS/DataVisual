@@ -12,7 +12,7 @@ def test_plot_line(patch):
     parameter_0 = Xparameter(
         values=numpy.linspace(0, 1, 4),
         name='parameter 0',
-        format=".2e",
+        format_string=".2e",
         unit="[A.U.]",
         long_label='Parameter: 0',
         short_label='Param: 0'
@@ -21,7 +21,7 @@ def test_plot_line(patch):
     parameter_1 = Xparameter(
         values=numpy.linspace(0, 4, 100),
         name='parameter 1',
-        format=".2e",
+        format_string=".2e",
         unit="[A.U.]",
         long_label='Parameter: 1',
         short_label='Param: 1'
@@ -29,7 +29,7 @@ def test_plot_line(patch):
 
     y_parameter = Xparameter(
         name='Measurement',
-        format="<20s",
+        format_string="<20s",
         unit="1",
         long_label='Arbitrary measure',
         short_label='Arbit. measure'
@@ -63,7 +63,7 @@ def test_plot_std_line(patch):
     parameter_0 = Xparameter(
         values=x0,
         name='parameter 0',
-        format=".2e",
+        format_string=".2e",
         unit="[A.U.]",
         long_label='Parameter: 0',
         short_label='Param: 0'
@@ -72,7 +72,7 @@ def test_plot_std_line(patch):
     parameter_1 = Xparameter(
         values=x1,
         name='parameter 1',
-        format=".2e",
+        format_string=".2e",
         unit="[A.U.]",
         long_label='Parameter: 1',
         short_label='Param: 1'
@@ -81,7 +81,7 @@ def test_plot_std_line(patch):
     parameter_2 = Xparameter(
         values=x2,
         name='parameter 2',
-        format=".2e",
+        format_string=".2e",
         unit="[A.U.]",
         long_label='Parameter: 2',
         short_label='Param: 2'
@@ -89,7 +89,7 @@ def test_plot_std_line(patch):
 
     y_parameter = Xparameter(
         name='Measurement',
-        format="<20s",
+        format_string="<20s",
         unit="1",
         long_label='Arbitrary measure',
         short_label='Arbit. measure'
@@ -114,7 +114,7 @@ def test_mean_plot_line(patch):
     parameter_0 = Xparameter(
         values=numpy.linspace(0, 1, 5),
         name='parameter 0',
-        format=".2e",
+        format_string=".2e",
         unit="[A.U.]",
         long_label='Parameter: 0',
         short_label='Param: 0'
@@ -123,7 +123,7 @@ def test_mean_plot_line(patch):
     parameter_1 = Xparameter(
         values=numpy.linspace(0, 4, 100),
         name='parameter 1',
-        format=".2e",
+        format_string=".2e",
         unit="[A.U.]",
         long_label='Parameter: 1',
         short_label='Param: 1'
@@ -132,7 +132,7 @@ def test_mean_plot_line(patch):
     parameter_2 = Xparameter(
         values=numpy.linspace(0, 4, 10),
         name='parameter 1',
-        format=".2e",
+        format_string=".2e",
         unit="[A.U.]",
         long_label='Parameter: 1',
         short_label='Param: 1'
@@ -140,7 +140,7 @@ def test_mean_plot_line(patch):
 
     y_parameter = Xparameter(
         name='Measurement',
-        format="<20s",
+        format_string="<20s",
         unit="1",
         long_label='Arbitrary measure',
         short_label='Arbit. measure'
@@ -167,7 +167,7 @@ def test_std_plot_line(patch):
     parameter_0 = Xparameter(
         values=numpy.linspace(0, 1, 5),
         name='parameter 0',
-        format=".2e",
+        format_string=".2e",
         unit="[A.U.]",
         long_label='Parameter: 0',
         short_label='Param: 0'
@@ -176,7 +176,7 @@ def test_std_plot_line(patch):
     parameter_1 = Xparameter(
         values=numpy.linspace(0, 4, 100),
         name='parameter 1',
-        format=".2e",
+        format_string=".2e",
         unit="[A.U.]",
         long_label='Parameter: 1',
         short_label='Param: 1'
@@ -185,7 +185,7 @@ def test_std_plot_line(patch):
     parameter_2 = Xparameter(
         values=numpy.linspace(0, 4, 10),
         name='parameter 1',
-        format=".2e",
+        format_string=".2e",
         unit="[A.U.]",
         long_label='Parameter: 1',
         short_label='Param: 1'
@@ -193,7 +193,7 @@ def test_std_plot_line(patch):
 
     y_parameter = Xparameter(
         name='Measurement',
-        format="<20s",
+        format_string="<20s",
         unit="1",
         long_label='Arbitrary measure',
         short_label='Arbit. measure'
@@ -220,7 +220,7 @@ def test_rsd_plot_line(patch):
     parameter_0 = Xparameter(
         values=numpy.linspace(0, 1, 5),
         name='parameter 0',
-        format=".2e",
+        format_string=".2e",
         unit="[A.U.]",
         long_label='Parameter: 0',
         short_label='Param: 0'
@@ -229,7 +229,7 @@ def test_rsd_plot_line(patch):
     parameter_1 = Xparameter(
         values=numpy.linspace(0, 4, 100),
         name='parameter 1',
-        format=".2e",
+        format_string=".2e",
         unit="[A.U.]",
         long_label='Parameter: 1',
         short_label='Param: 1'
@@ -238,7 +238,7 @@ def test_rsd_plot_line(patch):
     parameter_2 = Xparameter(
         values=numpy.linspace(0, 4, 10),
         name='parameter 1',
-        format=".2e",
+        format_string=".2e",
         unit="[A.U.]",
         long_label='Parameter: 1',
         short_label='Param: 1'
@@ -246,7 +246,7 @@ def test_rsd_plot_line(patch):
 
     y_parameter = Xparameter(
         name='Measurement',
-        format="<20s",
+        format_string="<20s",
         unit="1",
         long_label='Arbitrary measure',
         short_label='Arbit. measure'

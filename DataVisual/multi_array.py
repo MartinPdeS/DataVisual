@@ -3,6 +3,7 @@
 
 import numpy
 from dataclasses import dataclass
+from typing import Any, Optional, Callable
 
 import DataVisual.tables as Table
 from DataVisual.utils import scale_unit
@@ -11,18 +12,39 @@ from copy import deepcopy
 
 
 @dataclass
-class DataVisual(object):
+class DataVisual:
+    """
+    A class for visualizing and manipulating data associated with X and Y dimensions.
+
+    Attributes:
+    -----------
+    x_table : Xtable
+        A table representing the X dimensions.
+    y : object
+        An object representing the Y dimensions, expected to have a `values` attribute.
+    scale : str, optional
+        The scale type for the visualization, defaults to 'none'.
+    """
+
     x_table: Table.Xtable
-    """ Table representing the x dimensions """
-    y: object
-    """ Parameter representing the y dimensions """
+    y: Any
     scale: str = 'none'
 
+    def __post_init__(self):
+        self._validate_attributes()
+
+    def _validate_attributes(self):
+        """Ensures that the 'y' attribute has a 'values' attribute."""
+        if not hasattr(self.y, 'values'):
+            raise ValueError("The 'y' attribute must have a 'values' attribute.")
+
     @property
-    def shape(self):
+    def shape(self) -> tuple:
+        """Returns the shape of the y values."""
         return self.y.values.shape
 
-    def generate_y_copy(function):
+    def generate_y_copy(operation: Callable):
+        """Decorator to generate a y copy for operations like mean, std, and rsd."""
         def wrapper(self, axis):
             new_y = deepcopy(self.y)
 
@@ -30,7 +52,7 @@ class DataVisual(object):
 
             x_table = Table.Xtable(x_table)
 
-            new_values = function(self, axis=axis)
+            new_values = operation(self, axis=axis)
 
             new_y.values = new_values
 
@@ -88,6 +110,10 @@ class DataVisual(object):
 
         return std / mean
 
+    def _normalize(self, values: numpy.ndarray) -> numpy.ndarray:
+        """Normalizes the y values."""
+        return (values - numpy.mean(values)) / numpy.std(values)
+
     def plot(
             self,
             x: Table.Xparameter,
@@ -96,24 +122,28 @@ class DataVisual(object):
             add_box: bool = False,
             **kwargs) -> SceneList:
         """
-        Plots the array according to the input parameters
+        Generates a plot of the data.
 
-        :param      x:          THe x-axis parameter
-        :type       x:          Table.Xparameter
-        :param      normalize:  The normalize
-        :type       normalize:  bool
-        :param      std:        The standard
-        :type       std:        { type_description }
-        :param      add_box:    Indicates if the box is added
-        :type       add_box:    bool
-        :param      kwargs:     The keywords arguments
-        :type       kwargs:     dictionary
+        Parameters:
+        -----------
+        x : Xparameter
+            The parameter for the x-axis.
+        normalize : bool, optional
+            If True, normalize the y data, by default False.
+        std : Xparameter, optional
+            The parameter for standard deviation, by default None.
+        add_box : bool, optional
+            If True, adds a box with additional information to the plot, by default False.
+        **kwargs : dict
+            Additional keyword arguments for plotting.
 
-        :returns:   The scene list.
-        :rtype:     SceneList
+        Returns:
+        --------
+        SceneList
+            A SceneList object containing the plot.
         """
         y = deepcopy(self.y)
-        y.values = self.y.values
+        # y.values = self.y.values
 
         x.is_base = True
 
@@ -147,8 +177,8 @@ class DataVisual(object):
         return figure
 
     def add_box_info_to_ax(self, ax: Axis, except_parameter: list = []) -> None:
-        column_labels = []
-        table_values = []
+        """Adds a box with additional information to the axis."""
+        column_labels, table_values = [], []
 
         for x_parameter in self.x_table:
             if x_parameter.is_base:
@@ -289,15 +319,14 @@ class DataVisual(object):
 
     def scale_unit(self, scale: str, inverse_proportional: bool = False) -> None:
         """
-        Function that scales the unit an arrays of the parameter
+        Scales the unit of the y parameter based on the given scale.
 
-        :param      scale:                 The scale
-        :type       scale:                 str
-        :param      inverse_proportional:  The inverse proportional
-        :type       inverse_proportional:  bool
-
-        :returns:   No return
-        :rtype:     None
+        Parameters:
+        -----------
+        scale : str
+            The scale type (e.g., 'micro', 'nano').
+        inverse_proportional : bool, optional
+            Whether the scaling is inverse proportional, by default False.
         """
         return scale_unit(
             parameter=self.y,
