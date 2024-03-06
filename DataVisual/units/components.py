@@ -120,6 +120,7 @@ class Efficiency(BaseUnit, metaclass=UnitMeta):
     is_inverse: bool = False
     string_format: str = '.1f'
     power: int = 1
+    use_prefix: bool = False
 
     def __init__(self, *args, **kwargs):
         return super().__init__(*args, **kwargs)

@@ -42,10 +42,11 @@ class UnitMeta(type):
     def __new__(cls, clsname, bases, attrs):
         new_class = super().__new__(cls, clsname, bases, attrs)
         is_inverse = attrs.get('is_inverse', False)
+        use_prefix = attrs.get('use_prefix', False)
+
         power = attrs.get('power', 1)  # Default power is 1
 
         def make_property(prefix, multiplier, is_inverse, power):
-
             if not is_inverse:
                 def getter(self):
                     return getattr(self, 'base_values') / (multiplier ** power)
@@ -71,7 +72,6 @@ class BaseUnit():
     normalized: bool = False
     use_long_label_for_repr: bool = False
     use_prefix: bool = True
-    use_value_repr: bool = False
 
     def __init__(
             self,
@@ -80,12 +80,14 @@ class BaseUnit():
             string_format: str | None = None,
             values: float | numpy.ndarray | None = None,
             use_long_label_for_repr: bool = False,
-            use_prefix: bool = True,
-            value_representation: float | numpy.ndarray | None = None,
-            use_value_repr: bool = False):
+            use_prefix: bool = None,
+            value_representation: float | numpy.ndarray | None = None):
 
         if string_format is not None:
             self.string_format = string_format
+
+        if use_prefix is not None:
+            self.use_prefix = use_prefix
 
         self.long_label = long_label
 
@@ -93,7 +95,6 @@ class BaseUnit():
 
         self.value_representation = value_representation
         self.base_values = values
-        self.use_value_repr = use_value_repr
         self.use_long_label_for_repr = use_long_label_for_repr
 
     def __repr__(self) -> str:
@@ -176,6 +177,11 @@ class BaseUnit():
 
         label = label.replace('_', ' ')
 
+        if self.value_representation is not None:
+            value = self.value_representation[index]
+            label += f" {value}"
+            return label
+
         if self.use_long_label_for_repr:
             return label
 
@@ -190,17 +196,26 @@ class BaseUnit():
             return self.long_label
 
         if index is not None:
-            if self.use_value_repr:
-                value = self.value_representation[index]
-                label += f" {value}"
-            else:
-                value = getattr(self, long_prefix + '_' + self.unit)[index]
-                label += f"={value:{self.string_format}}"
+            value = getattr(self, long_prefix + '_' + self.unit)[index]
+            label += f"={value:{self.string_format}}"
 
         if add_unit and (self.unit != ''):
             label += f" [{short_prefix}{unit}]"
 
         return label
+
+    def get_values(self, index: int, use_prefix: bool = True):
+        if use_prefix and self.use_prefix:
+            long_prefix, short_prefix = self.get_closest_prefix_string()
+        else:
+            long_prefix, _ = 'base', 'base'
+
+        if self.value_representation is not None:
+            return self.value_representation[index]
+
+        else:
+
+            return getattr(self, long_prefix + '_' + self.unit)[index]
 
     def get_array(self, scaled: bool = False):
         if not scaled or not self.use_prefix:
