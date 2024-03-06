@@ -1,17 +1,14 @@
-.. |Logo| image:: https://github.com/MartinPdeS/DataVisual/raw/master/docs/images/logo.png
+|logo|
 
 DataVisual
 ==========
 
-.. |python| image:: https://img.shields.io/pypi/pyversions/datavisual.svg
-   :target: https://www.python.org/
-.. |unittest| image:: https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/MartinPdeS/f0955be398d59efac69042c1b0fbece2/raw/06ffc2ef9781e62f4eb489a45fed5e3d1739ce25/DataVisualcoverage_badge.json
-.. |docs| image:: https://readthedocs.org/projects/datavisual/badge/?version=latest
-   :target: https://datavisual.readthedocs.io/en/latest/
-.. |PyPi| image:: https://badge.fury.io/py/DataVisual.svg
-   :target: https://pypi.org/project/DataVisual/
-.. |PyPi_download| image:: https://img.shields.io/pypi/dm/datavisual.svg
-   :target: https://pypistats.org/packages/datavisual
+|python|
+|unittest|
+|docs|
+|PyPi|
+|PyPi_download|
+
 
 Personal high-dimensional package
 ---------------------------------
@@ -50,3 +47,16 @@ DataVisual is actively being developed by Martin Poinsinet de Sivry-Houle. If yo
 - [Email](mailto:martin.poinsinet-de-sivry@polymtl.ca?subject=DataVisual)
 
 DataVisual aims to continuously improve and welcomes contributions from the community.
+
+
+.. |Logo| image:: https://github.com/MartinPdeS/DataVisual/raw/master/docs/images/logo.png
+
+.. |python| image:: https://img.shields.io/pypi/pyversions/datavisual.svg
+   :target: https://www.python.org/
+.. |unittest| image:: https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/MartinPdeS/f0955be398d59efac69042c1b0fbece2/raw/06ffc2ef9781e62f4eb489a45fed5e3d1739ce25/DataVisualcoverage_badge.json
+.. |docs| image:: https://readthedocs.org/projects/datavisual/badge/?version=latest
+   :target: https://datavisual.readthedocs.io/en/latest/
+.. |PyPi| image:: https://badge.fury.io/py/DataVisual.svg
+   :target: https://pypi.org/project/DataVisual/
+.. |PyPi_download| image:: https://img.shields.io/pypi/dm/datavisual.svg
+   :target: https://pypistats.org/packages/datavisual
