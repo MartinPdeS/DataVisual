@@ -1,3 +1,5 @@
+|Logo|
+
 DataVisual
 ==========
 
@@ -72,3 +74,5 @@ Email:`martin.poinsinet-de-sivry@polymtl.ca <mailto:martin.poinsinet-de-sivry@po
 
 .. |docs| image:: https://readthedocs.org/projects/datavisual/badge/?version=latest
    :target: https://datavisual.readthedocs.io/en/latest/
+
+.. |Logo| image:: https://github.com/MartinPdeS/DataVisual/raw/master/docs/images/logo.png

@@ -1,3 +1,4 @@
 
-from .multi_array import DataVisual
-from .tables import Xparameter, Xtable
+from .multi_array import Array
+from .tables import Table
+from .units import *

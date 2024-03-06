@@ -3,16 +3,17 @@
 
 import numpy
 from dataclasses import dataclass
-from typing import Any, Optional, Callable
+from typing import Any, Callable
 
-import DataVisual.tables as Table
-from DataVisual.utils import scale_unit
 from MPSPlots.render2D import SceneList, Axis
 from copy import deepcopy
 
+from DataVisual.tables import Table
+from DataVisual.units import BaseUnit
+
 
 @dataclass
-class DataVisual:
+class Array:
     """
     A class for visualizing and manipulating data associated with X and Y dimensions.
 
@@ -26,7 +27,7 @@ class DataVisual:
         The scale type for the visualization, defaults to 'none'.
     """
 
-    x_table: Table.Xtable
+    x_table: Table
     y: Any
     scale: str = 'none'
 
@@ -50,13 +51,13 @@ class DataVisual:
 
             x_table = [x for x in self.x_table if x != axis]
 
-            x_table = Table.Xtable(x_table)
+            x_table = Table(x_table)
 
             new_values = operation(self, axis=axis)
 
-            new_y.values = new_values
+            new_y.base_values = new_values
 
-            return DataVisual(x_table=x_table, y=new_y)
+            return Array(x_table=x_table, y=new_y)
 
         return wrapper
 
@@ -64,14 +65,14 @@ class DataVisual:
     def mean(self, axis: str):
         """
         Method compute and the mean value of specified axis.
-        The method then return a new DataVisual daughter object compressed in
+        The method then return a new Array daughter object compressed in
         the said axis.
 
         :param      axis:  Axis for which to perform the operation.
         :type       axis:  str
 
-        :returns:    New DataVisual instance containing the std value of axis.
-        :rtype:      DataVisual
+        :returns:    New Array instance containing the std value of axis.
+        :rtype:      Array
         """
 
         return numpy.mean(self.y.values, axis=axis.position)
@@ -80,14 +81,14 @@ class DataVisual:
     def std(self, axis: str):
         """
         Method compute and the std value of specified axis.
-        The method then return a new DataVisual daughter object compressed in
+        The method then return a new Array daughter object compressed in
         the said axis.
 
         :param      axis:  Axis for which to perform the operation.
         :type       axis:  str
 
-        :returns:    New DataVisual instance containing the std value of axis.
-        :rtype:      DataVisual
+        :returns:    New Array instance containing the std value of axis.
+        :rtype:      Array
         """
         return numpy.std(self.y.values, axis=axis.position)
 
@@ -95,15 +96,15 @@ class DataVisual:
     def rsd(self, axis: str):
         """
         Method compute and the rsd value of specified axis.
-        The method then return a new DataVisual daughter object compressed in
+        The method then return a new Array daughter object compressed in
         the said axis.
         rsd is defined as std/mean.
 
         :param      axis:  Axis for which to perform the operation.
         :type       axis:  str
 
-        :returns:    New DataVisual instance containing the std value of axis.
-        :rtype:      DataVisual
+        :returns:    New Array instance containing the std value of axis.
+        :rtype:      Array
         """
         std = numpy.std(self.y.values, axis=axis.position)
         mean = numpy.mean(self.y.values, axis=axis.position)
@@ -116,9 +117,9 @@ class DataVisual:
 
     def plot(
             self,
-            x: Table.Xparameter,
+            x: BaseUnit,
             normalize: bool = False,
-            std: Table.Xparameter = None,
+            std: BaseUnit = None,
             add_box: bool = False,
             **kwargs) -> SceneList:
         """
@@ -126,11 +127,11 @@ class DataVisual:
 
         Parameters:
         -----------
-        x : Xparameter
+        x : BaseUnit
             The parameter for the x-axis.
         normalize : bool, optional
             If True, normalize the y data, by default False.
-        std : Xparameter, optional
+        std : BaseUnit, optional
             The parameter for standard deviation, by default None.
         add_box : bool, optional
             If True, adds a box with additional information to the plot, by default False.
@@ -149,11 +150,17 @@ class DataVisual:
         figure = SceneList(unit_size=(12, 5), tight_layout=True)
 
         if normalize:
-            y.normalize()
+            y.normalized = True
 
-        y_label = f" {y.long_label} [{y.unit}]"
+        y_label = y.get_representation(
+            use_prefix=True,
+            add_unit=True,
+        )
 
-        x_label = f" {x.long_label} [{x.unit}]"
+        x_label = x.get_representation(
+            use_prefix=True,
+            add_unit=True,
+        )
 
         ax = figure.append_ax(
             x_label=x_label,
@@ -186,7 +193,7 @@ class DataVisual:
             if x_parameter.size == 1:
                 column_labels.append(x_parameter.long_label)
 
-                table_string = x_parameter.get_value_representation(index=0)
+                table_string = x_parameter.get_representation(index=0, use_short_repr=True)
 
                 table_values.append(table_string)
 
@@ -216,21 +223,26 @@ class DataVisual:
             if i == slice(None):
                 continue
 
-            repr_string = x_parameter.get_representation(index=i, short=False)
+            repr_string = x_parameter.get_representation(
+                index=i,
+                use_short_repr=True,
+                use_prefix=True,
+                add_unit=True
+            )
 
             label += f" :: {repr_string}"
 
         return label
 
-    def add_line_plot_to_ax(self, ax: Axis, x: Table.Xparameter, y: Table.Xparameter, **kwargs) -> None:
+    def add_line_plot_to_ax(self, ax: Axis, x: BaseUnit, y: BaseUnit, **kwargs) -> None:
         """
         Method plot the multi-dimensional array with the x key as abscissa.
         kwargs can be passed as standard input to the artist Line from MPSPLots.
 
         :param      x:    Key of the self dict which represent the abscissa.
-        :type       x:    Table.Xparameter
+        :type       x:    BaseUnit
         :param      y:    Key of the self dict which represent the ordinate.
-        :type       y:    Table.Xparameter
+        :type       y:    BaseUnit
 
         :returns:   No returns
         :rtype:     None
@@ -250,25 +262,26 @@ class DataVisual:
             label = self.get_diff_label(slicer=slicer)
 
             slicer = tuple(slicer)
-            y_data = self.y.values[slicer]
+            y_data = self.y.get_array(scaled=True)[slicer].squeeze()
+            x_data = x.get_array(scaled=True)
 
             ax.add_line(
-                x=x.values,
-                y=y_data.squeeze(),
+                x=x_data,
+                y=y_data,
                 label=label,
                 line_width=2,
                 **kwargs
             )
 
-    def add_std_line_to_ax(self, ax: Axis, x: Table.Xparameter, y: Table.Xparameter, std: Table.Xparameter) -> None:
+    def add_std_line_to_ax(self, ax: Axis, x: BaseUnit, y: BaseUnit, std: BaseUnit) -> None:
         """
         Method plot the multi-dimensional array with the x key as abscissa.
         kwargs can be passed as standard input to the artist STDLine from MPSPLots.
 
         :param      x:    Key of the self dict which represent the abscissa.
-        :type       x:    Table.Xparameter
+        :type       x:    BaseUnit
         :param      y:    Key of the self dict which represent the ordinate.
-        :type       y:    Table.Xparameter
+        :type       y:    BaseUnit
 
         :returns:   No returns
         :rtype:     None
@@ -295,42 +308,26 @@ class DataVisual:
             slicer = tuple(slicer)
 
             y_std = numpy.std(
-                self.y.values,
+                self.y.get_array(scaled=True),
                 axis=std.position,
                 keepdims=True
             )
 
             y_mean = numpy.mean(
-                self.y.values,
+                self.y.get_array(scaled=True),
                 axis=std.position,
                 keepdims=True
             )
 
             y_std = y_std[slicer]
             y_mean = y_mean[slicer]
+            x_data = x.get_array(scaled=True)
 
             ax.add_std_line(
-                x=x.values,
+                x=x_data,
                 y_mean=y_mean.squeeze(),
                 y_std=y_std.squeeze(),
                 label=label
             )
-
-    def scale_unit(self, scale: str, inverse_proportional: bool = False) -> None:
-        """
-        Scales the unit of the y parameter based on the given scale.
-
-        Parameters:
-        -----------
-        scale : str
-            The scale type (e.g., 'micro', 'nano').
-        inverse_proportional : bool, optional
-            Whether the scaling is inverse proportional, by default False.
-        """
-        return scale_unit(
-            parameter=self.y,
-            inverse_proportional=inverse_proportional,
-            scale=scale
-        )
 
 # -

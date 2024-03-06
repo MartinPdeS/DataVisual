@@ -3,105 +3,97 @@
 
 from unittest.mock import patch
 import numpy
-from DataVisual import DataVisual, Xparameter
-import DataVisual.tables as Table
+import pytest
+from DataVisual import Array
+from DataVisual import Table
+from DataVisual.units import Length, Power, Area
 
 
-@patch("matplotlib.pyplot.show")
-def test_plot_line(patch):
-    parameter_0 = Xparameter(
-        values=numpy.linspace(0, 1, 4),
-        name='parameter 0',
-        format_string=".2e",
-        unit="[A.U.]",
-        long_label='Parameter: 0',
-        short_label='Param: 0'
+@pytest.fixture
+def mock_x_table_2() -> list:
+    parameter_0 = Length(
+        values=numpy.linspace(0, 1, 10),
+        long_label='Length: 0',
+        short_label='L: 0'
     )
 
-    parameter_1 = Xparameter(
-        values=numpy.linspace(0, 4, 100),
-        name='parameter 1',
-        format_string=".2e",
-        unit="[A.U.]",
-        long_label='Parameter: 1',
-        short_label='Param: 1'
-    )
-
-    y_parameter = Xparameter(
-        name='Measurement',
-        format_string="<20s",
-        unit="1",
-        long_label='Arbitrary measure',
-        short_label='Arbit. measure'
+    parameter_1 = Length(
+        values=numpy.linspace(0, 4, 10),
+        long_label='Length: 1',
+        short_label='L: 1'
     )
 
     x_table = [parameter_0, parameter_1]
 
-    y_parameter.values = 1 + 0.3 * numpy.random.rand(4, 100)
+    return Table(x_table)
 
-    data = DataVisual(
-        x_table=Table.Xtable(x_table),
-        y=y_parameter
+
+@pytest.fixture
+def mock_x_table_3() -> list:
+    parameter_0 = Length(
+        values=numpy.linspace(0, 1, 10),
+        long_label='Length: 0',
+        short_label='L: 0'
     )
 
-    figure = data.plot(x=parameter_1)
+    parameter_1 = Length(
+        values=numpy.linspace(0, 1, 10),
+        long_label='Length: 1',
+        short_label='L: 1'
+    )
+
+    parameter_2 = Area(
+        values=numpy.linspace(0, 1, 10),
+        long_label='Area: 1',
+        short_label='A: 1'
+    )
+
+    x_table = [parameter_0, parameter_1, parameter_2]
+
+    return Table(x_table)
+
+
+@pytest.fixture
+def mock_measure_2() -> list:
+    measure = Power(
+        long_label='Arbitrary measure',
+        short_label='Arbit. measure',
+        values=1 + 0.3 * numpy.random.rand(10, 10)
+    )
+
+    return measure
+
+
+@pytest.fixture
+def mock_measure_3() -> list:
+    measure = Power(
+        long_label='Arbitrary measure',
+        short_label='Arbit. measure',
+        values=1 + 0.3 * numpy.random.rand(10, 10, 10)
+    )
+
+    return measure
+
+
+@patch("matplotlib.pyplot.show")
+def test_plot_line(patch, mock_x_table_2, mock_measure_2):
+    data = Array(
+        x_table=mock_x_table_2,
+        y=mock_measure_2
+    )
+
+    figure = data.plot(x=mock_x_table_2[1])
 
     figure.show()
 
 
 @patch("matplotlib.pyplot.show")
-def test_plot_std_line(patch):
+def test_plot_std_line(patch, mock_x_table_3, mock_measure_3):
+    parameter_0, parameter_1, parameter_2 = mock_x_table_3
 
-    x0 = numpy.linspace(0, 1, 4)
-    x1 = numpy.linspace(0, 4, 100)
-    x2 = numpy.linspace(0, 10, 5)
-
-    x_mesh, y_mesh, z_mesh = numpy.meshgrid(x1, x0, x2)
-
-    scalar = numpy.sqrt(x_mesh**4 + y_mesh**1 + z_mesh**2)
-
-    parameter_0 = Xparameter(
-        values=x0,
-        name='parameter 0',
-        format_string=".2e",
-        unit="[A.U.]",
-        long_label='Parameter: 0',
-        short_label='Param: 0'
-    )
-
-    parameter_1 = Xparameter(
-        values=x1,
-        name='parameter 1',
-        format_string=".2e",
-        unit="[A.U.]",
-        long_label='Parameter: 1',
-        short_label='Param: 1'
-    )
-
-    parameter_2 = Xparameter(
-        values=x2,
-        name='parameter 2',
-        format_string=".2e",
-        unit="[A.U.]",
-        long_label='Parameter: 2',
-        short_label='Param: 2'
-    )
-
-    y_parameter = Xparameter(
-        name='Measurement',
-        format_string="<20s",
-        unit="1",
-        long_label='Arbitrary measure',
-        short_label='Arbit. measure'
-    )
-
-    x_table = [parameter_0, parameter_1, parameter_2]
-
-    y_parameter.values = scalar
-
-    data = DataVisual(
-        x_table=Table.Xtable(x_table),
-        y=y_parameter,
+    data = Array(
+        x_table=mock_x_table_3,
+        y=mock_measure_3,
     )
 
     figure = data.plot(x=parameter_1, std=parameter_2)
@@ -110,49 +102,12 @@ def test_plot_std_line(patch):
 
 
 @patch("matplotlib.pyplot.show")
-def test_mean_plot_line(patch):
-    parameter_0 = Xparameter(
-        values=numpy.linspace(0, 1, 5),
-        name='parameter 0',
-        format_string=".2e",
-        unit="[A.U.]",
-        long_label='Parameter: 0',
-        short_label='Param: 0'
-    )
+def test_mean_plot_line(patch, mock_x_table_3, mock_measure_3):
+    parameter_0, parameter_1, parameter_2 = mock_x_table_3
 
-    parameter_1 = Xparameter(
-        values=numpy.linspace(0, 4, 100),
-        name='parameter 1',
-        format_string=".2e",
-        unit="[A.U.]",
-        long_label='Parameter: 1',
-        short_label='Param: 1'
-    )
-
-    parameter_2 = Xparameter(
-        values=numpy.linspace(0, 4, 10),
-        name='parameter 1',
-        format_string=".2e",
-        unit="[A.U.]",
-        long_label='Parameter: 1',
-        short_label='Param: 1'
-    )
-
-    y_parameter = Xparameter(
-        name='Measurement',
-        format_string="<20s",
-        unit="1",
-        long_label='Arbitrary measure',
-        short_label='Arbit. measure'
-    )
-
-    x_table = [parameter_0, parameter_1, parameter_2]
-
-    y_parameter.values = 1 + 0.3 * numpy.random.rand(4, 100, 10)
-
-    data = DataVisual(
-        x_table=Table.Xtable(x_table),
-        y=y_parameter
+    data = Array(
+        x_table=mock_x_table_3,
+        y=mock_measure_3
     )
 
     data = data.mean(axis=parameter_0)
@@ -163,49 +118,12 @@ def test_mean_plot_line(patch):
 
 
 @patch("matplotlib.pyplot.show")
-def test_std_plot_line(patch):
-    parameter_0 = Xparameter(
-        values=numpy.linspace(0, 1, 5),
-        name='parameter 0',
-        format_string=".2e",
-        unit="[A.U.]",
-        long_label='Parameter: 0',
-        short_label='Param: 0'
-    )
+def test_std_plot_line(patch, mock_x_table_3, mock_measure_3):
+    parameter_0, parameter_1, parameter_2 = mock_x_table_3
 
-    parameter_1 = Xparameter(
-        values=numpy.linspace(0, 4, 100),
-        name='parameter 1',
-        format_string=".2e",
-        unit="[A.U.]",
-        long_label='Parameter: 1',
-        short_label='Param: 1'
-    )
-
-    parameter_2 = Xparameter(
-        values=numpy.linspace(0, 4, 10),
-        name='parameter 1',
-        format_string=".2e",
-        unit="[A.U.]",
-        long_label='Parameter: 1',
-        short_label='Param: 1'
-    )
-
-    y_parameter = Xparameter(
-        name='Measurement',
-        format_string="<20s",
-        unit="1",
-        long_label='Arbitrary measure',
-        short_label='Arbit. measure'
-    )
-
-    x_table = [parameter_0, parameter_1, parameter_2]
-
-    y_parameter.values = 1 + 0.3 * numpy.random.rand(4, 100, 10)
-
-    data = DataVisual(
-        x_table=Table.Xtable(x_table),
-        y=y_parameter
+    data = Array(
+        x_table=mock_x_table_3,
+        y=mock_measure_3
     )
 
     data = data.std(axis=parameter_0)
@@ -216,49 +134,12 @@ def test_std_plot_line(patch):
 
 
 @patch("matplotlib.pyplot.show")
-def test_rsd_plot_line(patch):
-    parameter_0 = Xparameter(
-        values=numpy.linspace(0, 1, 5),
-        name='parameter 0',
-        format_string=".2e",
-        unit="[A.U.]",
-        long_label='Parameter: 0',
-        short_label='Param: 0'
-    )
+def test_rsd_plot_line(patch, mock_x_table_3, mock_measure_3):
+    parameter_0, parameter_1, parameter_2 = mock_x_table_3
 
-    parameter_1 = Xparameter(
-        values=numpy.linspace(0, 4, 100),
-        name='parameter 1',
-        format_string=".2e",
-        unit="[A.U.]",
-        long_label='Parameter: 1',
-        short_label='Param: 1'
-    )
-
-    parameter_2 = Xparameter(
-        values=numpy.linspace(0, 4, 10),
-        name='parameter 1',
-        format_string=".2e",
-        unit="[A.U.]",
-        long_label='Parameter: 1',
-        short_label='Param: 1'
-    )
-
-    y_parameter = Xparameter(
-        name='Measurement',
-        format_string="<20s",
-        unit="1",
-        long_label='Arbitrary measure',
-        short_label='Arbit. measure'
-    )
-
-    x_table = [parameter_0, parameter_1, parameter_2]
-
-    y_parameter.values = 1 + 0.3 * numpy.random.rand(4, 100, 10)
-
-    data = DataVisual(
-        x_table=Table.Xtable(x_table),
-        y=y_parameter
+    data = Array(
+        x_table=mock_x_table_3,
+        y=mock_measure_3
     )
 
     data = data.rsd(axis=parameter_0)
