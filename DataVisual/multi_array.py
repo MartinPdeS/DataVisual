@@ -262,8 +262,8 @@ class Array:
             label = self.get_diff_label(slicer=slicer)
 
             slicer = tuple(slicer)
-            y_data = self.y.get_array(scaled=True)[slicer].squeeze()
-            x_data = x.get_array(scaled=True)
+            y_data = self.y.get_array()[slicer].squeeze()
+            x_data = x.get_array()
 
             ax.add_line(
                 x=x_data,
@@ -308,20 +308,20 @@ class Array:
             slicer = tuple(slicer)
 
             y_std = numpy.std(
-                self.y.get_array(scaled=True),
+                self.y.get_array(),
                 axis=std.position,
                 keepdims=True
             )
 
             y_mean = numpy.mean(
-                self.y.get_array(scaled=True),
+                self.y.get_array(),
                 axis=std.position,
                 keepdims=True
             )
 
             y_std = y_std[slicer]
             y_mean = y_mean[slicer]
-            x_data = x.get_array(scaled=True)
+            x_data = x.get_array()
 
             ax.add_std_line(
                 x=x_data,

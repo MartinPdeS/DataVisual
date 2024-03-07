@@ -21,9 +21,10 @@ class Length(BaseUnit, metaclass=UnitMeta):
     is_inverse: bool = False
     string_format: str = '.0f'
     power: int = 1
+    use_prefix: bool = True
 
     def __init__(self, *args, **kwargs):
-        return super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 class Area(BaseUnit, metaclass=UnitMeta):
@@ -32,6 +33,7 @@ class Area(BaseUnit, metaclass=UnitMeta):
     is_inverse: bool = False
     string_format: str = '.0f'
     power: int = 2
+    use_prefix: bool = True
 
     def __init__(self, *args, **kwargs):
         return super().__init__(*args, **kwargs)
@@ -43,6 +45,7 @@ class Mass(BaseUnit, metaclass=UnitMeta):
     is_inverse: bool = False
     string_format: str = '.0f'
     power: int = 1
+    use_prefix: bool = True
 
     def __init__(self, *args, **kwargs):
         return super().__init__(*args, **kwargs)
@@ -54,7 +57,7 @@ class Power(BaseUnit, metaclass=UnitMeta):
     is_inverse: bool = False
     string_format: str = '.0f'
     power: int = 1
-    # use_prefix: bool = True
+    use_prefix: bool = True
 
     def __init__(self, *args, **kwargs):
         return super().__init__(*args, **kwargs)
@@ -66,6 +69,7 @@ class Energy(BaseUnit, metaclass=UnitMeta):
     is_inverse: bool = False
     string_format: str = '.0f'
     power: int = 1
+    use_prefix: bool = True
 
     def __init__(self, *args, **kwargs):
         return super().__init__(*args, **kwargs)
@@ -77,6 +81,7 @@ class Index(BaseUnit, metaclass=UnitMeta):
     is_inverse: bool = False
     string_format: str = '.2f'
     power: int = 1
+    use_prefix: bool = True
 
     def __init__(self, *args, **kwargs):
         return super().__init__(*args, **kwargs)
@@ -88,6 +93,7 @@ class Radian(BaseUnit, metaclass=UnitMeta):
     is_inverse: bool = False
     string_format: str = '.1f'
     power: int = 1
+    use_prefix: bool = False
 
     def __init__(self, *args, **kwargs):
         return super().__init__(*args, **kwargs)
@@ -99,6 +105,7 @@ class Degree(BaseUnit, metaclass=UnitMeta):
     is_inverse: bool = False
     string_format: str = ''
     power: int = 1
+    use_prefix: bool = False
 
     def __init__(self, *args, **kwargs):
         return super().__init__(*args, **kwargs)
@@ -110,6 +117,7 @@ class Amplitude(BaseUnit, metaclass=UnitMeta):
     is_inverse: bool = False
     string_format: str = '.1f'
     power: int = 1
+    use_prefix: bool = True
 
     def __init__(self, *args, **kwargs):
         return super().__init__(*args, **kwargs)
@@ -133,6 +141,7 @@ class Custom(BaseUnit, metaclass=UnitMeta):
     is_inverse: bool = False
     string_format: str = ''
     power: int = 1
+    use_prefix: bool = False
 
     def __init__(self, *args, **kwargs):
         return super().__init__(*args, **kwargs)

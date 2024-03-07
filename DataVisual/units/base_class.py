@@ -1,30 +1,31 @@
 import numpy
-from dataclasses import dataclass
 from typing import Iterable
 
 
 class UnitMeta(type):
     """
-    A metaclass for creating classes that represent quantities with units, automatically
-    adding properties for SI prefixes like nano, kilo, mega, etc., with support for inversely
-    proportional conversions.
+    A metaclass for dynamically adding SI prefix properties to unit classes. Supports
+    direct and inversely proportional unit conversions based on the provided power
+    and whether the unit should use prefixes.
+
+    Attributes:
+        prefixes (dict): Maps SI prefix names to their corresponding multiplier values.
+        prefix_to_string (dict): Maps SI prefix names to their string representations.
     """
+
+    # Define multipliers for common SI prefixes
     prefixes = {
-        "nano": 1e-9,
-        "micro": 1e-6,
-        "milli": 1e-3,
-        "centi": 1e-2,
-        "deci": 1e-1,
-        "base": 1,
-        "deca": 1e1,
-        'hecto': 1e2,
-        "kilo": 1e3,
-        "mega": 1e6,
-        "giga": 1e9,
-        "tera": 1e12,
+        "nano": 1e-9, "micro": 1e-6, "milli": 1e-3, "centi": 1e-2,
+        "deci": 1e-1, "base": 1, "deca": 1e1, "hecto": 1e2,
+        "kilo": 1e3, "mega": 1e6, "giga": 1e9, "tera": 1e12,
     }
 
-    prefix_orders = [-9, -6, -3, -2, -1, 0, 1, 2, 3, 6, 9, 12]
+    # SI prefixes to their string representations
+    prefix_to_string = {
+        "nano": "n", "micro": r"$\mu$", "milli": "m", "centi": "c", "deci": "d",
+        "base": "", "deca": "da", "hecto": "h", "kilo": "k", "mega": "M",
+        "giga": "G", "tera": "T"
+    }
 
     # List of (magnitude, prefix) tuples
     magnitude_to_prefixes = [
@@ -42,49 +43,38 @@ class UnitMeta(type):
         (12, "tera")
     ]
 
-    prefix_to_string = {
-        "nano": "n",
-        "micro": r"$\mu$",
-        "milli": "m",
-        "centi": "c",
-        "deci": "d",
-        "base": "",
-        "deca": "da",
-        "hecto": "h",
-        "kilo": "k",
-        "mega": "M",
-        "giga": "G",
-        "tera": "T"
-    }
-
     def __new__(cls, clsname, bases, attrs):
+        # Initialize the class as usual
         new_class = super().__new__(cls, clsname, bases, attrs)
+
+        # Retrieve class-level configuration
         is_inverse = attrs.get('is_inverse', False)
         use_prefix = attrs.get('use_prefix', True)
-
         power = attrs.get('power', 1)  # Default power is 1
 
+        # Skip prefix property creation if not using prefixes
         if not use_prefix:
             return new_class
 
-        def make_property(prefix, multiplier, is_inverse, power):
-
+        # Define property creation logic
+        def make_property(prefix, multiplier):
+            """
+            Creates a property for an SI prefix that adjusts the base values
+            according to the multiplier, considering direct or inverse proportion.
+            """
             if not is_inverse:
-                def getter(self):
-                    return getattr(self, 'base_values') / (multiplier ** power)
-                def setter(self, value):
-                    setattr(self, 'base_values', value * (multiplier ** power))
+                getter = lambda self: getattr(self, 'base_values') * (multiplier ** -power)
+                setter = lambda self, value: setattr(self, 'base_values', value / (multiplier ** -power))
             else:
-                def getter(self):
-                    return getattr(self, 'base_values') * (multiplier ** power)
-                def setter(self, value):
-                    setattr(self, 'base_values', value / (multiplier ** power))
-
+                getter = lambda self: getattr(self, 'base_values') * (multiplier ** power)
+                setter = lambda self, value: setattr(self, 'base_values', value / (multiplier ** power))
             return property(getter, setter)
 
+        # Add SI prefix properties to the class
+        unit_attr = attrs.get('unit').lower()  # Ensure consistent attribute naming
         for prefix, multiplier in cls.prefixes.items():
-            property_name = f"{prefix}_{attrs['unit'].lower()}"
-            setattr(new_class, property_name, make_property(prefix, multiplier, is_inverse, power))
+            property_name = f"{prefix}_{unit_attr}"
+            setattr(new_class, property_name, make_property(prefix, multiplier))
 
         return new_class
 
@@ -122,19 +112,21 @@ class BaseUnit:
             string_format: str = '',
             values: numpy.ndarray | None = None,
             use_long_label_for_repr: bool = False,
-            use_prefix: bool = True,
+            use_prefix: bool = None,
             value_representation: numpy.ndarray | None = None,
             normalized: bool = False):
-        self.long_label = long_label
+
+        self.long_label = long_label if long_label is not None else self.long_label
         self.short_label = short_label if short_label is not None else long_label.lower().replace(' ', '_')
-        self.string_format = string_format if string_format is not None else ".2f"
+        self.string_format = string_format if string_format is not None else self.string_format
+        self.use_prefix = use_prefix if use_prefix is not None else self.use_prefix
+
         self.base_values = values
         self.use_long_label_for_repr = use_long_label_for_repr
-        self.use_prefix = use_prefix if use_prefix is not None else True
+
         self.value_representation = value_representation
         self.normalized = normalized
         self.is_base = False
-        self.string_format = ''
 
     def __repr__(self) -> str:
         """Returns a string representation of the BaseUnit instance."""
@@ -243,7 +235,6 @@ class BaseUnit:
         if index is not None:
             if use_prefix and self.use_prefix:
                 long_prefix, _ = self.get_prefix(use_prefix=use_prefix)
-                # Assuming there's logic to handle attribute retrieval by prefix
                 return getattr(self, f"{long_prefix}_{self.unit}")[index]
             else:
                 return self.base_values if index is None else self.base_values[index]
@@ -279,7 +270,7 @@ class BaseUnit:
 
         return long_prefix, short_prefix
 
-    def get_array(self, scaled: bool = False) -> numpy.ndarray:
+    def get_array(self) -> numpy.ndarray:
         """
         Returns the measurement values, optionally scaled according to the closest SI prefix.
 
@@ -289,14 +280,11 @@ class BaseUnit:
         Returns:
             np.ndarray: The measurement values, scaled if requested.
         """
-        if not scaled or not self.use_prefix:
+        if not self.use_prefix:
             return self.base_values
         else:
-            return self.get_scaled_array()
+            long_prefix, short_prefix = self.get_closest_prefix_string()
+            return getattr(self, f'{long_prefix}_{self.get_unit()}')
 
-    def get_scaled_array(self) -> numpy.ndarray:
-        """Returns a formatted string representation for the value at the given index."""
-        long_prefix, short_prefix = self.get_closest_prefix_string()
-        return getattr(self, f'{long_prefix}_{self.get_unit()}')
 
 # -
