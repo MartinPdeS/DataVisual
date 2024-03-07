@@ -230,7 +230,7 @@ class Array:
                 add_unit=True
             )
 
-            label += f" :: {repr_string}"
+            label += "/ " + f"{repr_string}"
 
         return label
 

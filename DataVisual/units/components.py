@@ -54,6 +54,7 @@ class Power(BaseUnit, metaclass=UnitMeta):
     is_inverse: bool = False
     string_format: str = '.0f'
     power: int = 1
+    # use_prefix: bool = True
 
     def __init__(self, *args, **kwargs):
         return super().__init__(*args, **kwargs)
@@ -96,7 +97,7 @@ class Degree(BaseUnit, metaclass=UnitMeta):
     unit: str = 'degree'
     short_unit: str = 'deg'
     is_inverse: bool = False
-    string_format: str = '.1f'
+    string_format: str = ''
     power: int = 1
 
     def __init__(self, *args, **kwargs):
@@ -130,7 +131,7 @@ class Custom(BaseUnit, metaclass=UnitMeta):
     unit: str = ''
     short_unit: str = ''
     is_inverse: bool = False
-    string_format: str = '.1f'
+    string_format: str = ''
     power: int = 1
 
     def __init__(self, *args, **kwargs):
