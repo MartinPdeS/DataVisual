@@ -10,7 +10,7 @@ from DataVisual.units import components
 def test_units(unit_string: str):
     unit_class = getattr(components, unit_string)
     unit = unit_class(
-        values=numpy.linspace(0, 1, 10),
+        base_values=numpy.linspace(0, 1, 10),
         long_label='Unit',
         short_label='U0'
     )

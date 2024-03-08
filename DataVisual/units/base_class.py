@@ -15,15 +15,15 @@ class UnitMeta(type):
 
     # Define multipliers for common SI prefixes
     prefixes = {
-        "nano": 1e-9, "micro": 1e-6, "milli": 1e-3, "centi": 1e-2,
-        "deci": 1e-1, "base": 1, "deca": 1e1, "hecto": 1e2,
-        "kilo": 1e3, "mega": 1e6, "giga": 1e9, "tera": 1e12,
+        "nano": 1e-9, "micro": 1e-6, "milli": 1e-3,
+        "base": 1, "kilo": 1e3, "mega": 1e6,
+        "giga": 1e9, "tera": 1e12,
     }
 
     # SI prefixes to their string representations
     prefix_to_string = {
-        "nano": "n", "micro": r"$\mu$", "milli": "m", "centi": "c", "deci": "d",
-        "base": "", "deca": "da", "hecto": "h", "kilo": "k", "mega": "M",
+        "nano": "n", "micro": r"$\mu$", "milli": "m",
+        "base": "", "kilo": "k", "mega": "M",
         "giga": "G", "tera": "T"
     }
 
@@ -32,11 +32,7 @@ class UnitMeta(type):
         (-9, "nano"),
         (-6, "micro"),
         (-3, "milli"),
-        (-2, "centi"),
-        (-1, "deci"),
         (0, "base"),
-        (1, "deca"),
-        (2, "hecto"),
         (3, "kilo"),
         (6, "mega"),
         (9, "giga"),
@@ -46,35 +42,6 @@ class UnitMeta(type):
     def __new__(cls, clsname, bases, attrs):
         # Initialize the class as usual
         new_class = super().__new__(cls, clsname, bases, attrs)
-
-        # Retrieve class-level configuration
-        is_inverse = attrs.get('is_inverse', False)
-        use_prefix = attrs.get('use_prefix', True)
-        power = attrs.get('power', 1)  # Default power is 1
-
-        # Skip prefix property creation if not using prefixes
-        if not use_prefix:
-            return new_class
-
-        # Define property creation logic
-        def make_property(prefix, multiplier):
-            """
-            Creates a property for an SI prefix that adjusts the base values
-            according to the multiplier, considering direct or inverse proportion.
-            """
-            if not is_inverse:
-                getter = lambda self: getattr(self, 'base_values') * (multiplier ** -power)
-                setter = lambda self, value: setattr(self, 'base_values', value / (multiplier ** -power))
-            else:
-                getter = lambda self: getattr(self, 'base_values') * (multiplier ** power)
-                setter = lambda self, value: setattr(self, 'base_values', value / (multiplier ** power))
-            return property(getter, setter)
-
-        # Add SI prefix properties to the class
-        unit_attr = attrs.get('unit').lower()  # Ensure consistent attribute naming
-        for prefix, multiplier in cls.prefixes.items():
-            property_name = f"{prefix}_{unit_attr}"
-            setattr(new_class, property_name, make_property(prefix, multiplier))
 
         return new_class
 
@@ -101,8 +68,6 @@ class BaseUnit:
         values: Property that returns the measurement values, normalized if applicable.
         get_closest_prefix_string: Identifies the closest SI prefix based on the values' magnitude.
         get_representation: Generates a formatted string representation for the unit and its values.
-        get_prefix: Determines the appropriate SI prefix for representation.
-        get_array: Retrieves the measurement values, optionally scaled by the closest SI prefix.
     """
 
     def __init__(
@@ -110,23 +75,57 @@ class BaseUnit:
             long_label: str,
             short_label: str | None = None,
             string_format: str = '',
-            values: numpy.ndarray | None = None,
+            base_values: numpy.ndarray | None = None,
             use_long_label_for_repr: bool = False,
             use_prefix: bool = None,
             value_representation: numpy.ndarray | None = None,
-            normalized: bool = False):
+            normalized: bool = False,
+            auto_scale: bool = True):
 
         self.long_label = long_label if long_label is not None else self.long_label
         self.short_label = short_label if short_label is not None else long_label.lower().replace(' ', '_')
         self.string_format = string_format if string_format is not None else self.string_format
         self.use_prefix = use_prefix if use_prefix is not None else self.use_prefix
 
-        self.base_values = values
         self.use_long_label_for_repr = use_long_label_for_repr
 
         self.value_representation = value_representation
         self.normalized = normalized
         self.is_base = False
+        self.auto_scale = auto_scale
+        self.set_base_values(base_values)
+
+    def scale_values(self) -> None:
+        if not self.use_prefix:
+            self.long_prefix = ''
+            self.short_prefix = ''
+            self.values = self.base_values
+            return
+
+        if self.base_values is None or self.value_representation is not None:
+            self.long_prefix = ''
+            self.short_prefix = ''
+            return
+
+        if self.normalized:
+            self.long_prefix = ''
+            self.short_prefix = ''
+            self.values = self.base_values / self.base_values.max()
+            return
+
+        long_prefix, short_prefix = self.get_closest_prefix_string()
+
+        multiplier = UnitMeta.prefixes[long_prefix]
+
+        self.long_prefix = long_prefix
+
+        self.short_prefix = short_prefix
+
+        self.values = self.base_values * (multiplier ** -self.power)
+
+    def set_base_values(self, base_values: numpy.ndarray) -> numpy.ndarray:
+        self.base_values = base_values
+        self.scale_values()
 
     def __repr__(self) -> str:
         """Returns a string representation of the BaseUnit instance."""
@@ -144,15 +143,15 @@ class BaseUnit:
     @property
     def size(self) -> int:
         """Returns the number of values."""
-        return numpy.size(self.values)
+        return numpy.size(self.base_values)
 
     @property
     def shape(self) -> tuple:
         """Returns the shape of the values."""
         return numpy.shape(self.values)
 
-    @classmethod
-    def closest_prefix_order(cls, order_of_magnitude: float) -> str:
+    @staticmethod
+    def closest_prefix_order(order_of_magnitude: float) -> str:
         """
         Determines the closest SI prefix based on the order of magnitude of the values.
 
@@ -162,18 +161,24 @@ class BaseUnit:
         Returns:
             str: The closest SI prefix.
         """
-        # Find the prefix with the highest magnitude that is less than or equal to the order_of_magnitude
-        for magnitude, prefix in reversed(cls.magnitude_to_prefixes):
-            if order_of_magnitude >= magnitude:
-                return prefix
-        # Fallback to the smallest prefix if none match
-        return cls.magnitude_to_prefixes[0][1]
-
-    @property
-    def values(self) -> numpy.ndarray:
-        if self.normalized:
-            return self.base_values / self.base_values.max()
-        return self.base_values
+        if order_of_magnitude < -9:
+            return "nano"  # Below nano, remain at the lowest prefix
+        elif order_of_magnitude < -6:
+            return "nano"
+        elif order_of_magnitude < -3:
+            return "micro"
+        elif order_of_magnitude < 0:
+            return "milli"
+        elif order_of_magnitude <= 3:
+            return "base"
+        elif order_of_magnitude < 6:
+            return "kilo"
+        elif order_of_magnitude < 9:
+            return "mega"
+        elif order_of_magnitude < 12:
+            return "giga"
+        else:
+            return "tera"  # Above tera, remain at the highest prefix
 
     def get_closest_prefix_string(self) -> tuple[str, str]:
         """
@@ -183,6 +188,7 @@ class BaseUnit:
             tuple[str, str]: A tuple containing the long and short forms of the closest SI prefix.
         """
         base_value = numpy.max(self.base_values) if isinstance(self.base_values, Iterable) else self.base_values
+
         magnitude = numpy.log10(abs(base_value)) / self.power
 
         prefix = self.closest_prefix_order(magnitude)
@@ -217,6 +223,7 @@ class BaseUnit:
         representation = f"{label}"
         if value is not None:
             representation += f": {value:{self.string_format}}"
+
         if add_unit and unit not in ['', 'base']:
             representation += f" [{unit}]"
 
@@ -233,11 +240,7 @@ class BaseUnit:
             return self.value_representation if index is None else self.value_representation[index]
 
         if index is not None:
-            if use_prefix and self.use_prefix:
-                long_prefix, _ = self.get_prefix(use_prefix=use_prefix)
-                return getattr(self, f"{long_prefix}_{self.unit}")[index]
-            else:
-                return self.base_values if index is None else self.base_values[index]
+            return self.values[index]
 
     def _get_unit_string(self, add_unit: bool, use_prefix: bool) -> str:
         """
@@ -248,43 +251,10 @@ class BaseUnit:
         if not add_unit:
             return ""
 
-        # Fetch the appropriate prefix based on whether SI prefixes are used.
-        _, short_prefix = self.get_prefix(use_prefix=use_prefix)
         unit = self.short_unit if self.unit else ""
+
+        short_prefix = '' if self.short_prefix == 'base' else self.short_prefix
+
         return f"{short_prefix}{unit}"
-
-    def get_prefix(self, use_prefix: bool) -> tuple[str, str]:
-        """
-        Determines the appropriate SI prefix for representation based on the class's values.
-
-        This method needs to be implemented or adjusted based on the specific logic for determining
-        the prefix, likely involving `closest_prefix_order` or similar logic.
-
-        Returns:
-            tuple[str, str]: A tuple containing the long form and short form of the SI prefix.
-        """
-        if use_prefix and self.use_prefix:
-            long_prefix, short_prefix = self.get_closest_prefix_string()
-        else:
-            long_prefix, short_prefix = 'base', 'base'
-
-        return long_prefix, short_prefix
-
-    def get_array(self) -> numpy.ndarray:
-        """
-        Returns the measurement values, optionally scaled according to the closest SI prefix.
-
-        Args:
-            scaled (bool, optional): Whether to scale the values according to the closest SI prefix. Defaults to False.
-
-        Returns:
-            np.ndarray: The measurement values, scaled if requested.
-        """
-        if not self.use_prefix:
-            return self.base_values
-        else:
-            long_prefix, short_prefix = self.get_closest_prefix_string()
-            return getattr(self, f'{long_prefix}_{self.get_unit()}')
-
 
 # -

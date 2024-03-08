@@ -36,7 +36,7 @@ class Array:
 
     def _validate_attributes(self):
         """Ensures that the 'y' attribute has a 'values' attribute."""
-        if not hasattr(self.y, 'values'):
+        if not hasattr(self.y, 'base_values'):
             raise ValueError("The 'y' attribute must have a 'values' attribute.")
 
     @property
@@ -262,8 +262,8 @@ class Array:
             label = self.get_diff_label(slicer=slicer)
 
             slicer = tuple(slicer)
-            y_data = self.y.get_array()[slicer].squeeze()
-            x_data = x.get_array()
+            y_data = self.y.values[slicer].squeeze()
+            x_data = x.values
 
             ax.add_line(
                 x=x_data,
@@ -308,20 +308,20 @@ class Array:
             slicer = tuple(slicer)
 
             y_std = numpy.std(
-                self.y.get_array(),
+                self.y.values,
                 axis=std.position,
                 keepdims=True
             )
 
             y_mean = numpy.mean(
-                self.y.get_array(),
+                self.y.values,
                 axis=std.position,
                 keepdims=True
             )
 
             y_std = y_std[slicer]
             y_mean = y_mean[slicer]
-            x_data = x.get_array()
+            x_data = x.values
 
             ax.add_std_line(
                 x=x_data,

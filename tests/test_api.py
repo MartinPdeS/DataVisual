@@ -12,13 +12,13 @@ from DataVisual.units import Length, Power, Area
 @pytest.fixture
 def mock_x_table_2() -> list:
     parameter_0 = Length(
-        values=numpy.linspace(0, 1, 10),
+        base_values=numpy.linspace(0, 1, 10),
         long_label='Length: 0',
         short_label='L: 0'
     )
 
     parameter_1 = Length(
-        values=numpy.linspace(0, 4, 10),
+        base_values=numpy.linspace(0, 4, 10),
         long_label='Length: 1',
         short_label='L: 1'
     )
@@ -31,19 +31,19 @@ def mock_x_table_2() -> list:
 @pytest.fixture
 def mock_x_table_3() -> list:
     parameter_0 = Length(
-        values=numpy.linspace(0, 1, 10),
+        base_values=numpy.linspace(0, 1, 10),
         long_label='Length: 0',
         short_label='L: 0'
     )
 
     parameter_1 = Length(
-        values=numpy.linspace(0, 1, 10),
+        base_values=numpy.linspace(0, 1, 10),
         long_label='Length: 1',
         short_label='L: 1'
     )
 
     parameter_2 = Area(
-        values=numpy.linspace(0, 1, 10),
+        base_values=numpy.linspace(0, 1, 10),
         long_label='Area: 1',
         short_label='A: 1'
     )
@@ -58,7 +58,7 @@ def mock_measure_2() -> list:
     measure = Power(
         long_label='Arbitrary measure',
         short_label='Arbit. measure',
-        values=1 + 0.3 * numpy.random.rand(10, 10)
+        base_values=1 + 0.3 * numpy.random.rand(10, 10)
     )
 
     return measure
@@ -69,7 +69,7 @@ def mock_measure_3() -> list:
     measure = Power(
         long_label='Arbitrary measure',
         short_label='Arbit. measure',
-        values=1 + 0.3 * numpy.random.rand(10, 10, 10)
+        base_values=1 + 0.3 * numpy.random.rand(10, 10, 10)
     )
 
     return measure
