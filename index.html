@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Personal high-dimensional package &#8212; DataVisual 1.4.0
+ documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b20cc3f5" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css?v=ca3dbeb3" />
+    <link rel="stylesheet" type="text/css" href="/opt/hostedtoolcache/Python/3.11.8/x64/lib/python3.11/site-packages/docs/source/_static/default.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="_static/default.css?v=a57c9d2b" />
+    <script src="_static/documentation_options.js?v=9172181d"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head><body>
+        <div style="background-color: #00008B; text-align: left; padding: 10px 10px 15px 15px">
+        <a href="#"><h1 style="font-size: 3em; color: white">FiberFusing</h1></a>
+        </div>
+        
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="theory.html">theory</a>|&nbsp;</li>
+        <li><a href="code.html">code</a>|&nbsp;</li>
+        <li><a href="examples.html">examples</a>|&nbsp;</li>
+        <li><a href="references.html">references</a>|&nbsp;</li>
+        <li><a href="search.html">search</a>|&nbsp;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Personal high-dimensional package</a></li> 
+      </ul>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <hr class="docutils" />
+<p><a class="reference external" href="https://www.python.org/"><img alt="python" src="https://img.shields.io/pypi/pyversions/datavisual.svg" /></a>
+<img alt="unittest" src="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/MartinPdeS/f0955be398d59efac69042c1b0fbece2/raw/06ffc2ef9781e62f4eb489a45fed5e3d1739ce25/DataVisualcoverage_badge.json" />
+<a class="reference external" href="https://datavisual.readthedocs.io/en/latest/"><img alt="docs" src="https://readthedocs.org/projects/datavisual/badge/?version=latest" /></a>
+<a class="reference external" href="https://pypi.org/project/DataVisual/"><img alt="PyPi" src="https://badge.fury.io/py/DataVisual.svg" /></a>
+<a class="reference external" href="https://pypistats.org/packages/datavisual"><img alt="PyPi_download" src="https://img.shields.io/pypi/dm/datavisual.svg" /></a></p>
+<section id="personal-high-dimensional-package">
+<h1>Personal high-dimensional package<a class="headerlink" href="#personal-high-dimensional-package" title="Link to this heading">¶</a></h1>
+<p>DataVisual is a package designed to streamline your data visualization process, offering a simplified interface for creating complex plots with ease.</p>
+<p><strong>Installation</strong></p>
+<p>Install DataVisual directly from PyPi:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>DataVisual
+</pre></div>
+</div>
+<p><strong>Getting Started</strong></p>
+<p>For coding examples and how to get started, please visit the [examples section](<a class="reference external" href="https://datavisual.readthedocs.io/en/master/gallery/index.html">https://datavisual.readthedocs.io/en/master/gallery/index.html</a>) of our documentation.</p>
+<p><strong>Local Testing</strong></p>
+<p>To contribute or test locally, clone the GitHub repository and install the required dependencies:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/MartinPdeS/DataVisual.git
+<span class="nb">cd</span><span class="w"> </span>DataVisual
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements/requirements.txt
+coverage<span class="w"> </span>run<span class="w"> </span>--source<span class="o">=</span>DataVisual<span class="w"> </span>--module<span class="w"> </span>pytest<span class="w"> </span>--verbose<span class="w"> </span>tests
+coverage<span class="w"> </span>report<span class="w"> </span>--show-missing
+</pre></div>
+</div>
+<p><strong>Contact Information</strong></p>
+<p>DataVisual is actively being developed by Martin Poinsinet de Sivry-Houle. If you’re interested in collaborating or have questions, feel free to reach out:</p>
+<ul class="simple">
+<li><p>[GitHub](<a class="reference external" href="https://github.com/MartinPdS">https://github.com/MartinPdS</a>)</p></li>
+<li><p>[Email](<a class="reference external" href="mailto:martin&#46;poinsinet-de-sivry&#37;&#52;&#48;polymtl&#46;ca?subject=DataVisual">mailto:martin<span>&#46;</span>poinsinet-de-sivry<span>&#64;</span>polymtl<span>&#46;</span>ca?subject=DataVisual</a>)</p></li>
+</ul>
+<p>DataVisual aims to continuously improve and welcomes contributions from the community.</p>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="theory.html">theory</a>|&nbsp;</li>
+        <li><a href="code.html">code</a>|&nbsp;</li>
+        <li><a href="examples.html">examples</a>|&nbsp;</li>
+        <li><a href="references.html">references</a>|&nbsp;</li>
+        <li><a href="search.html">search</a>|&nbsp;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Personal high-dimensional package</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2021, Martin Poinsinet de Sivry-Houle.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+  </body>
+</html>
