@@ -102,7 +102,7 @@ class BaseUnit:
             self.values = self.base_values
             return
 
-        if self.base_values is None or self.value_representation is not None:
+        if None in self.base_values or self.value_representation is not None:
             self.long_prefix = ''
             self.short_prefix = ''
             return
@@ -124,7 +124,8 @@ class BaseUnit:
         self.values = self.base_values * (multiplier ** -self.power)
 
     def set_base_values(self, base_values: numpy.ndarray) -> numpy.ndarray:
-        self.base_values = base_values
+        self.base_values = numpy.atleast_1d(base_values)
+
         self.scale_values()
 
     def __repr__(self) -> str:

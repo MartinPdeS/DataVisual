@@ -26,4 +26,4 @@ class Table:
         return self.parameters[index]
 
     def __repr__(self) -> str:
-        return f"Xtable(size={len(self.parameters)})"
+        return str(self.parameters)

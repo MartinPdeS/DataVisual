@@ -319,14 +319,10 @@ class Array:
                 keepdims=True
             )
 
-            y_std = y_std[slicer]
-            y_mean = y_mean[slicer]
-            x_data = x.values
-
             ax.add_std_line(
-                x=x_data,
-                y_mean=y_mean.squeeze(),
-                y_std=y_std.squeeze(),
+                x=x.values,
+                y_mean=y_mean[slicer].squeeze(),
+                y_std=y_std[slicer].squeeze(),
                 label=label
             )
 
