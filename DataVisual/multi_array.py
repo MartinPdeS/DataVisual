@@ -46,6 +46,7 @@ class Array:
 
     def generate_y_copy(operation: Callable):
         """Decorator to generate a y copy for operations like mean, std, and rsd."""
+
         def wrapper(self, axis):
             new_y = deepcopy(self.y)
 
