@@ -29,6 +29,8 @@ dependencies = [
     "MPSPlots",
 ]
 
+[tool.setuptools]
+packages = ["DataVisual"]
 
 [tool.setuptools_scm]
 write_to = "DataVisual/_version.py"
