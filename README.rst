@@ -4,7 +4,7 @@ DataVisual
 ==========
 
 |python|
-|unittest|
+|coverage|
 |docs|
 |PyPi|
 |PyPi_download|
@@ -54,8 +54,6 @@ DataVisual aims to continuously improve and welcomes contributions from the comm
 .. |python| image:: https://img.shields.io/pypi/pyversions/datavisual.svg
    :target: https://www.python.org/
 
-.. |unittest| image:: https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/MartinPdeS/f0955be398d59efac69042c1b0fbece2/raw/06ffc2ef9781e62f4eb489a45fed5e3d1739ce25/DataVisualcoverage_badge.json
-
 .. |docs| image:: https://readthedocs.org/projects/datavisual/badge/?version=latest
    :target: https://datavisual.readthedocs.io/en/latest/
 
@@ -64,3 +62,7 @@ DataVisual aims to continuously improve and welcomes contributions from the comm
 
 .. |PyPi_download| image:: https://img.shields.io/pypi/dm/datavisual.svg
    :target: https://pypistats.org/packages/datavisual
+
+.. |coverage| image:: https://raw.githubusercontent.com/MartinPdeS/DataVisual/python-coverage-comment-action-data/badge.svg
+   :alt: Unittest coverage
+   :target: https://htmlpreview.github.io/?https://github.com/MartinPdeS/DataVisual/blob/python-coverage-comment-action-data/htmlcov/index.html
