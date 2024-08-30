@@ -17,13 +17,10 @@ def setup(app):
 autodoc_mock_imports = [
     'numpy',
     'matplotlib',
-    'DataVisual',
-    'MPSPlots',
-    'scipy',
 ]
 
 project = 'DataVisual'
-copyright = '2021, Martin Poinsinet de Sivry-Houle'
+copyright = '2024, Martin Poinsinet de Sivry-Houle'
 author = 'Martin Poinsinet de Sivry-Houle'
 today_fmt = '%B %d, %Y'
 
