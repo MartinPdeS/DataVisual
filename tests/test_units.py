@@ -5,8 +5,11 @@ import pytest
 import numpy as np
 from DataVisual.units import components
 
+scalings = [1e-9, 1e-6, 1e-3, 1e0, 1e3, 1e6, 1e9, 1e12]
+
 @pytest.mark.parametrize("unit_string", components.__all__, ids=components.__all__)
-def test_units(unit_string: str):
+@pytest.mark.parametrize("scaling", scalings, ids=[f'scale: {s:.0e}' for s in scalings])
+def test_units(scaling, unit_string: str):
     """
     Test the initialization and basic functionality of unit classes in the components module.
 
